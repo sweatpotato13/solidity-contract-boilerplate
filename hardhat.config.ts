@@ -7,6 +7,7 @@ import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-solhint';
 import 'solidity-coverage';
 import '@nomiclabs/hardhat-etherscan';
+import '@openzeppelin/hardhat-upgrades';
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
