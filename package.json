@@ -31,7 +31,7 @@
     "@nomicfoundation/hardhat-verify": "^1.0.0",
     "@openzeppelin/contracts": "4.9.3",
     "@rushstack/eslint-patch": "^1.5.1",
-    "@typechain/ethers-v6": "^0.4.3",
+    "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^8.0.0",
     "@types/babel__core": "^7",
     "@types/chai": "^4.2.0",

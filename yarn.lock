@@ -1830,17 +1830,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typechain/ethers-v6@npm:^0.4.3":
-  version: 0.4.3
-  resolution: "@typechain/ethers-v6@npm:0.4.3"
+"@typechain/ethers-v6@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "@typechain/ethers-v6@npm:0.5.1"
   dependencies:
     lodash: "npm:^4.17.15"
     ts-essentials: "npm:^7.0.1"
   peerDependencies:
     ethers: 6.x
-    typechain: ^8.3.1
+    typechain: ^8.3.2
     typescript: ">=4.7.0"
-  checksum: 10c0/e66728763916f5b4ce4c9753098e17c1dd17f5913792de9801c79fcbc57b46a52a1f6602ce35be377c7503cc5004b285dab8bd911afe13b057007d5ccf947094
+  checksum: 10c0/f3c80151c07e01adbf520e0854426649edb0ee540920569487dd8da7eca2fa8615710f4c0eda008e7afdf255fbb8dfdebf721a5d324a4dffeb087611d9bd64b9
   languageName: node
   linkType: hard
 
@@ -9240,7 +9240,7 @@ __metadata:
     "@nomicfoundation/hardhat-verify": "npm:^1.0.0"
     "@openzeppelin/contracts": "npm:4.9.3"
     "@rushstack/eslint-patch": "npm:^1.5.1"
-    "@typechain/ethers-v6": "npm:^0.4.3"
+    "@typechain/ethers-v6": "npm:^0.5.1"
     "@typechain/hardhat": "npm:^8.0.0"
     "@types/babel__core": "npm:^7"
     "@types/chai": "npm:^4.2.0"
