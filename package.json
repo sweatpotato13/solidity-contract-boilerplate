@@ -59,7 +59,7 @@
     "solidity-coverage": "^0.8.12",
     "ts-node": ">=10.9.2",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "5.4.5"
+    "typescript": "5.3.3"
   },
   "dependencies": {
     "hardhat": "^2.22.3",
