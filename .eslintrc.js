@@ -2,8 +2,7 @@ require("@rushstack/eslint-patch/modern-module-resolution");
 
 module.exports = {
     root: true,
-    plugins: ["prettier"],
-    extends: ["@chainsafe", "prettier"],
+    extends: ["@chainsafe"],
     rules: {
         "prettier/prettier": "error",
         "@typescript-eslint/no-unsafe-member-access": 0,
