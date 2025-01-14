@@ -16,8 +16,8 @@
     "lint:typescript:fix": "prettier --config .prettierrc.json --write 'scripts/**/*.ts' 'test/**/*.ts' 'hardhat.config.ts'",
     "lint:solidity": "npx solhint 'src/contracts/**/*.sol'",
     "lint:solidity:fix": "prettier --write --plugin=prettier-plugin-solidity 'src/contracts/**/*.sol'",
-    "lint": "yarn run lint:typescript && yarn run lint:solidity",
-    "lint:fix": "yarn run lint:typescript:fix && yarn run lint:solidity:fix",
+    "lint": "pnpm run lint:typescript && pnpm run lint:solidity",
+    "lint:fix": "pnpm run lint:typescript:fix && pnpm run lint:solidity:fix",
     "test": "REPORT_GAS=true npx hardhat test"
   },
   "devDependencies": {
@@ -64,6 +64,5 @@
   "dependencies": {
     "hardhat": "^2.22.6",
     "typechain": "^8.3.2"
-  },
-  "packageManager": "yarn@4.2.2"
+  }
 }
