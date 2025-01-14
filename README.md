@@ -22,17 +22,9 @@
 ## How to use it
 
 1.  Click the "Use this template" green button
-2.  `yarn install`
+2.  `pnpm install`
 3.  Modify the contract/test case
-4.  Run the contract locally with `yarn chain` and `yarn deploy` (deploy to local hardhat network)
-5.  Test the contract with `yarn test`
+4.  Run the contract locally with `pnpm node` and `pnpm deploy:local` (deploy to local hardhat network)
+5.  Test the contract with `pnpm test`
 6.  Change `.env.example` into `.env` and configure it
 7.  Deploy your contract where you want!
-
-## TODO
-
-- [ ] Support to eslint for the typescript testing lib
-- [ ] Support for [hardhat-deploy](https://hardhat.org/plugins/hardhat-deploy.html), an Hardhat Plugin to better manage deployment
-- [ ] Add support to [solidity-coverage](https://hardhat.org/plugins/solidity-coverage.html) plugin
-- [ ] Add support to [hardhat-gas-reporter plugin](https://hardhat.org/plugins/hardhat-gas-reporter.html)
-- [ ] TBD / Create a PR with suggestions!
