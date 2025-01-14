@@ -11,7 +11,9 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     const deployment = await deploy("Storage", {
         from: deployer,
+        args: [],
         log: true,
+        waitConfirmations: 1,
     });
 
     const storage = (await hre.ethers.getContractAt(
@@ -22,11 +24,20 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const address = await storage.getAddress();
     console.log("Storage deployed to:", address);
 
-    if (hre.network.name != "hardhat") {
-        await hre.run("etherscan-verify", {
-            network: hre.network.name,
-        });
+    if (hre.network.name !== "hardhat" && 
+        hre.network.name !== "localhost" && 
+        process.env.ETHERSCAN_API_KEY) {
+        try {
+            await hre.run("verify:verify", {
+                address: deployment.address,
+                constructorArguments: [],
+            });
+            console.log("Contract verified on Etherscan");
+        } catch (error) {
+            console.log("Verification failed:", error);
+        }
     }
 };
 
+deploy.tags = ["Storage"];
 export default deploy;
