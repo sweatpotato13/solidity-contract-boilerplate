@@ -17,10 +17,10 @@ jobs:
         with:
           node-version: '20.x'
 
-      - run: yarn install
+      - run: pnpm install
 
       - name: Run linter
-        run: yarn run lint:solidity
+        run: pnpm run lint:solidity
 
   lint-typescript:
     name: Lint Typescript
@@ -31,6 +31,6 @@ jobs:
         with:
           node-version: '20.x'
 
-      - run: yarn install
+      - run: pnpm install
       - name: Run linter
-        run: yarn run lint:typescript
+        run: pnpm run lint:typescript
