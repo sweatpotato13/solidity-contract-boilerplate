@@ -11,7 +11,8 @@
   "scripts": {
     "build": "npx hardhat compile",
     "coverage": "npx hardhat coverage",
-    "hardhat:deploy": "npx hardhat deploy --network",
+    "deploy:hardhat": "npx hardhat deploy --network hardhat",
+    "deploy:local": "npx hardhat deploy --network local",
     "lint:typescript": "eslint 'test/**/*.ts' 'scripts/**/*.ts'",
     "lint:typescript:fix": "prettier --config .prettierrc.json --write 'scripts/**/*.ts' 'test/**/*.ts' 'hardhat.config.ts'",
     "lint:solidity": "npx solhint 'src/contracts/**/*.sol'",
