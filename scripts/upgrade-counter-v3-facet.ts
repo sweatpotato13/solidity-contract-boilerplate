@@ -100,14 +100,8 @@ async function main() {
     const counterInfo = await counterFacetV3Proxy.getCounterInfo();
     console.log("Extended counter information:");
     console.log("  Counter value:", counterInfo[0].toString());
-    console.log(
-        "  Last incremented:",
-        counterInfo[1]
-    );
-    console.log(
-        "  Last decremented:",
-        counterInfo[2]
-    );
+    console.log("  Last incremented:", counterInfo[1]);
+    console.log("  Last decremented:", counterInfo[2]);
     console.log("  Total increments:", counterInfo[3].toString());
     console.log("  Total decrements:", counterInfo[4].toString());
     console.log("  Last modifier:", counterInfo[5]);
