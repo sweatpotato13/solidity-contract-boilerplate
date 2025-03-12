@@ -56,7 +56,8 @@ async function main() {
 
     // Set initial value to 10
     console.log("Setting initial value to 10...");
-    await calculatorFacetOnDiamond.setValue(10);
+    const tx1 = await calculatorFacetOnDiamond.setValue(10);
+    await tx1.wait();
 
     // Check result
     let result = await calculatorFacetOnDiamond.getResult();
@@ -64,25 +65,33 @@ async function main() {
 
     // Add 5
     console.log("Adding 5...");
-    await calculatorFacetOnDiamond.add(5);
+    const tx2 = await calculatorFacetOnDiamond.add(5);
+    await tx2.wait();
+    
     result = await calculatorFacetOnDiamond.getResult();
     console.log("After adding 5:", result);
 
     // Subtract 3
     console.log("Subtracting 3...");
-    await calculatorFacetOnDiamond.subtract(3);
+    const tx3 = await calculatorFacetOnDiamond.subtract(3);
+    await tx3.wait();
+    
     result = await calculatorFacetOnDiamond.getResult();
     console.log("After subtracting 3:", result);
 
     // Multiply by 2
     console.log("Multiplying by 2...");
-    await calculatorFacetOnDiamond.multiply(2);
+    const tx4 = await calculatorFacetOnDiamond.multiply(2);
+    await tx4.wait();
+    
     result = await calculatorFacetOnDiamond.getResult();
     console.log("After multiplying by 2:", result);
 
     // Divide by 4
     console.log("Dividing by 4...");
-    await calculatorFacetOnDiamond.divide(4);
+    const tx5 = await calculatorFacetOnDiamond.divide(4);
+    await tx5.wait();
+    
     result = await calculatorFacetOnDiamond.getResult();
     console.log("After dividing by 4:", result);
 
@@ -96,7 +105,9 @@ async function main() {
 
     // Reset the calculator
     console.log("Resetting calculator...");
-    await calculatorFacetOnDiamond.reset();
+    const tx6 = await calculatorFacetOnDiamond.reset();
+    await tx6.wait();
+    
     result = await calculatorFacetOnDiamond.getResult();
     console.log("After reset:", result);
 
