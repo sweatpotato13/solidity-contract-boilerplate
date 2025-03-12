@@ -1,7 +1,8 @@
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { FacetCutAction, getSelectors } from "../scripts/libraires/diamond";
+
+import { FacetCutAction, getSelectors } from "../scripts/libraries/diamond";
 
 describe("Diamond Contract Tests", function () {
     // Deploy diamond fixture
@@ -117,7 +118,7 @@ describe("Diamond Contract Tests", function () {
         });
 
         it("Should allow owner to transfer ownership", async function () {
-            const { diamondAddress, owner, otherAccount } =
+            const { diamondAddress, otherAccount } =
                 await loadFixture(deployDiamondFixture);
 
             const ownershipFacet = await ethers.getContractAt(
@@ -303,8 +304,7 @@ describe("Diamond Contract Tests", function () {
 
     describe("Diamond Upgrades", function () {
         it("Should allow adding new functions", async function () {
-            const { diamondAddress, owner } =
-                await loadFixture(deployDiamondFixture);
+            const { diamondAddress } = await loadFixture(deployDiamondFixture);
 
             // Deploy a new facet
             const NewFacet = await ethers.getContractFactory("CounterFacet");
@@ -343,8 +343,7 @@ describe("Diamond Contract Tests", function () {
         });
 
         it("Should allow removing functions", async function () {
-            const { diamondAddress, owner } =
-                await loadFixture(deployDiamondFixture);
+            const { diamondAddress } = await loadFixture(deployDiamondFixture);
 
             // Get all counter facet selectors
             const CounterFactory =

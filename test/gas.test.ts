@@ -1,7 +1,8 @@
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { FacetCutAction, getSelectors } from "../scripts/libraires/diamond";
+
+import { FacetCutAction, getSelectors } from "../scripts/libraries/diamond";
 
 describe("Diamond Gas Measurements", function () {
     // Deploy diamond fixture

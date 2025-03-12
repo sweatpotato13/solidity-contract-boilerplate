@@ -1,7 +1,8 @@
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { FacetCutAction, getSelectors } from "../scripts/libraires/diamond";
+
+import { FacetCutAction, getSelectors } from "../scripts/libraries/diamond";
 
 describe("Diamond Integration Tests", function () {
     // Deploy diamond fixture
@@ -264,8 +265,7 @@ describe("Diamond Integration Tests", function () {
     });
 
     it("Should support Diamond Loupe functions", async function () {
-        const { diamondLoupeFacet, diamondAddress } =
-            await loadFixture(deployDiamondFixture);
+        const { diamondLoupeFacet } = await loadFixture(deployDiamondFixture);
 
         // Get all facet addresses
         const facetAddresses = await diamondLoupeFacet.facetAddresses();
@@ -286,6 +286,6 @@ describe("Diamond Integration Tests", function () {
         // Verify the ERC20 functions are correctly registered
         const erc20Selectors =
             await diamondLoupeFacet.facetFunctionSelectors(facetAddress);
-        expect(erc20Selectors.includes(transferSelector)).to.be.true;
+        expect(erc20Selectors.includes(transferSelector)).to.equal(true);
     });
 });

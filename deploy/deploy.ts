@@ -2,7 +2,7 @@
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { getSelectors, FacetCutAction } from "../scripts/libraires/diamond";
+import { getSelectors, FacetCutAction } from "../scripts/libraries/diamond";
 import "@nomicfoundation/hardhat-ethers";
 
 // Define interfaces for better type safety

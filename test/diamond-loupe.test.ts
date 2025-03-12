@@ -1,8 +1,9 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { FacetCutAction, getSelectors } from "../scripts/libraires/diamond";
+import { expect } from "chai";
 import { Contract } from "ethers";
+import { ethers } from "hardhat";
+
+import { FacetCutAction, getSelectors } from "../scripts/libraries/diamond";
 
 describe("Diamond Loupe Tests", function () {
     // Deploy diamond fixture
@@ -120,7 +121,8 @@ describe("Diamond Loupe Tests", function () {
                 await loadFixture(deployDiamondFixture);
 
             // Test for each facet
-            for (const [facetName, facetContract] of Object.entries(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            for (const [_facetName, facetContract] of Object.entries(
                 facetContracts,
             )) {
                 const facetAddress = await facetContract.getAddress();
@@ -210,8 +212,9 @@ describe("Diamond Loupe Tests", function () {
             const ERC165_INTERFACE_ID = "0x01ffc9a7";
 
             // Should support ERC-165
-            expect(await diamondLoupe.supportsInterface(ERC165_INTERFACE_ID)).to
-                .be.true;
+            expect(
+                await diamondLoupe.supportsInterface(ERC165_INTERFACE_ID),
+            ).to.equal(true);
         });
 
         it("should support IDiamondLoupe interface", async function () {
@@ -225,7 +228,7 @@ describe("Diamond Loupe Tests", function () {
                 await diamondLoupe.supportsInterface(
                     DIAMOND_LOUPE_INTERFACE_ID,
                 ),
-            ).to.be.true;
+            ).to.equal(true);
         });
 
         it("should support IDiamondCut interface", async function () {
@@ -237,7 +240,7 @@ describe("Diamond Loupe Tests", function () {
             // Should support IDiamondCut
             expect(
                 await diamondLoupe.supportsInterface(DIAMOND_CUT_INTERFACE_ID),
-            ).to.be.true;
+            ).to.equal(true);
         });
     });
 });

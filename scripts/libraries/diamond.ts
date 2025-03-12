@@ -1,5 +1,3 @@
-/* global ethers */
-
 import { ethers } from "ethers";
 
 export enum FacetCutAction {
@@ -78,7 +76,8 @@ function remove(
                 if (v === func.selector) {
                     return false;
                 }
-            } catch (error) {
+            } catch (error: any) {
+                console.error(error);
                 console.warn(`Function not found: ${functionName}`);
             }
         }
@@ -104,7 +103,8 @@ function get(
                 if (v === func.selector) {
                     return true;
                 }
-            } catch (error) {
+            } catch (error: any) {
+                console.error(error);
                 console.warn(`Function not found: ${functionName}`);
             }
         }
