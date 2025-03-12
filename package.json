@@ -10,9 +10,9 @@
     ],
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [
-            "pnpm  lint:typescript"
+            "pnpm lint:typescript"
         ],
-        "*.{sol}": [
+        "*.sol": [
             "pnpm lint:solidity"
         ],
         "*.{md,json}": [
