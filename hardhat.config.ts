@@ -11,7 +11,7 @@ dotenv.config();
 const config: HardhatUserConfig = {
     defaultNetwork: "hardhat",
     solidity: {
-        version: "0.8.11",
+        version: "0.8.20",
         settings: {
             optimizer: {
                 enabled: true,
@@ -51,7 +51,7 @@ const config: HardhatUserConfig = {
         },
     },
     paths: {
-        deploy: "./scripts",
+        deploy: "./deploy",
         sources: "./src/contracts",
         tests: "./test",
         cache: "./cache",
