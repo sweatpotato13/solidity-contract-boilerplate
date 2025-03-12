@@ -1,9 +1,11 @@
 /* eslint prefer-const: "off" */
 
+import "@nomicfoundation/hardhat-ethers";
+
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { getSelectors, FacetCutAction } from "../scripts/libraries/diamond";
-import "@nomicfoundation/hardhat-ethers";
+
+import { FacetCutAction,getSelectors } from "../scripts/libraries/diamond";
 
 // Define interfaces for better type safety
 interface FacetCut {
@@ -17,9 +19,6 @@ const deployDiamond: DeployFunction = async function (hre: HardhatRuntimeEnviron
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    const accounts = await ethers.getSigners();
-    const contractOwner = accounts[0];
-
     // Deploy DiamondCutFacet
     const diamondCutFacet = await deploy("DiamondCutFacet", {
         from: deployer,
@@ -31,7 +30,7 @@ const deployDiamond: DeployFunction = async function (hre: HardhatRuntimeEnviron
     // Deploy Diamond
     const diamond = await deploy("Diamond", {
         from: deployer,
-        args: [contractOwner.address, diamondCutFacet.address],
+        args: [deployer, diamondCutFacet.address],
         log: true,
     });
 
