@@ -1,10 +1,11 @@
-import * as dotenv from "dotenv";
-import type { HardhatUserConfig } from "hardhat/config";
 import "hardhat-preprocessor";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-verify";
 import "hardhat-deploy";
+
+import * as dotenv from "dotenv";
+import type { HardhatUserConfig } from "hardhat/config";
 
 dotenv.config();
 
