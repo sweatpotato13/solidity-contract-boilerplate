@@ -17,6 +17,6 @@
         "incremental": true,
         "resolveJsonModule": true
     },
-    "include": ["./deploy", "./scripts", "tests"],
+    "include": ["./deploy", "./scripts", "./tests"],
     "files": ["./hardhat.config.ts"]
 }

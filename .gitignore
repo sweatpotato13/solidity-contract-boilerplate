@@ -30,3 +30,6 @@ deployments
 .history
 .vscode
 .vscode/**
+
+# Forge
+cache_forge

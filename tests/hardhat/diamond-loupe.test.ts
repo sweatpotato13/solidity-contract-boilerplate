@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { FacetCutAction, getSelectors } from "../scripts/libraries/diamond";
+import { FacetCutAction, getSelectors } from "../../scripts/libraries/diamond";
 
 describe("Diamond Loupe Tests", function () {
     // Deploy diamond fixture

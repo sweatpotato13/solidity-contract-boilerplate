@@ -2,6 +2,7 @@ import "hardhat-preprocessor";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-verify";
+import "@nomicfoundation/hardhat-foundry";
 import "hardhat-deploy";
 
 import * as dotenv from "dotenv";
