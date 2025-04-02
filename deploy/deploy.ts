@@ -41,7 +41,8 @@ const deployDiamond: DeployFunction = async function (hre: HardhatRuntimeEnviron
     async function verifyContract(address: string, constructorArguments: any[] = [], deployment?: any) {
         // Etherscan verification: Check if API key is set
         try {
-            if (network.name !== "hardhat" && network.name !== "localhost") {
+            console.log("network.name", network.name);
+            if (network.name !== "hardhat" && network.name !== "localhost" && network.name !== "local") {
                 // Wait for sufficient confirmations
                 if (deployment && deployment.receipt) {
                     // If we have the deployment receipt, we can wait for confirmations
