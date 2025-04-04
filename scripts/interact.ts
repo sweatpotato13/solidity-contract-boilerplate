@@ -4,48 +4,92 @@ async function main() {
     // 배포된 다이아몬드 주소
     const diamondAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 
-    // CounterFacet 인터페이스로 다이아몬드에 접근
-    const counterFacet = await ethers.getContractAt(
-        "CounterFacet",
-        diamondAddress,
-    );
-
-    // 현재 카운터 값 조회
-    const count = await counterFacet.getCount();
+    // 네트워크의 provider와 signer 가져오기
+    const provider = ethers.provider;
+    const [signer] = await ethers.getSigners();
+    
+    // CounterFacet ABI 가져오기
+    const CounterFacet = await ethers.getContractFactory("CounterFacet");
+    const counterInterface = CounterFacet.interface;
+    
+    // 현재 카운터 값 조회 - provider를 통해 호출
+    const countData = counterInterface.encodeFunctionData("getCount");
+    const countResult = await provider.call({
+        to: diamondAddress,
+        data: countData
+    });
+    const count = counterInterface.decodeFunctionResult("getCount", countResult)[0];
     console.log("Initial count:", count.toString());
 
-    // 카운터 증가
+    // 카운터 증가 - signer를 통해 트랜잭션 전송
     console.log("Incrementing counter...");
-    const incrementTx = await counterFacet.increment();
+    const incrementData = counterInterface.encodeFunctionData("increment");
+    const incrementTx = await signer.sendTransaction({
+        to: diamondAddress,
+        data: incrementData
+    });
     await incrementTx.wait();
 
     // 업데이트된 카운터 값 확인
-    const newCount = await counterFacet.getCount();
+    const newCountResult = await provider.call({
+        to: diamondAddress,
+        data: countData
+    });
+    const newCount = counterInterface.decodeFunctionResult("getCount", newCountResult)[0];
     console.log("New count:", newCount.toString());
 
-    // ERC20Facet 인터페이스로 다이아몬드에 접근
-    const erc20Facet = await ethers.getContractAt("ERC20Facet", diamondAddress);
+    // ERC20Facet ABI 가져오기
+    const ERC20Facet = await ethers.getContractFactory("ERC20Facet");
+    const erc20Interface = ERC20Facet.interface;
 
-    // 토큰 이름, 심볼, 소수점 확인
-    const name = await erc20Facet.name();
-    const symbol = await erc20Facet.symbol();
-    const decimals = await erc20Facet.decimals();
+    // 토큰 정보 조회
+    const nameData = erc20Interface.encodeFunctionData("name");
+    const nameResult = await provider.call({
+        to: diamondAddress,
+        data: nameData
+    });
+    const name = erc20Interface.decodeFunctionResult("name", nameResult)[0];
 
-    console.log(`Token info: ${name} (${symbol}), decimals: ${decimals}`);
+    const symbolData = erc20Interface.encodeFunctionData("symbol");
+    const symbolResult = await provider.call({
+        to: diamondAddress,
+        data: symbolData
+    });
+    const symbol = erc20Interface.decodeFunctionResult("symbol", symbolResult)[0];
+
+    const decimalsData = erc20Interface.encodeFunctionData("decimals");
+    const decimalsResult = await provider.call({
+        to: diamondAddress,
+        data: decimalsData
+    });
+    const decimals = erc20Interface.decodeFunctionResult("decimals", decimalsResult)[0];
+
+    console.log(`토큰 정보: ${name} (${symbol}), 소수점: ${decimals}`);
 
     // 토큰 민팅 (소유자만 가능)
-    const [owner] = await ethers.getSigners();
-    console.log(`Minting 1000 tokens to ${owner.address}...`);
-    const mintTx = await erc20Facet.mint(
-        owner.address,
-        ethers.parseUnits("1000", decimals),
-    );
+    console.log(`${signer.address}에 1000 토큰 민팅 중...`);
+    
+    const mintData = erc20Interface.encodeFunctionData("mint", [
+        signer.address,
+        ethers.parseUnits("1000", decimals)
+    ]);
+    
+    const mintTx = await signer.sendTransaction({
+        to: diamondAddress,
+        data: mintData
+    });
     await mintTx.wait();
 
     // 잔액 확인
-    const balance = await erc20Facet.balanceOf(owner.address);
+    const balanceOfData = erc20Interface.encodeFunctionData("balanceOf", [signer.address]);
+    const balanceResult = await provider.call({
+        to: diamondAddress,
+        data: balanceOfData
+    });
+    const balance = erc20Interface.decodeFunctionResult("balanceOf", balanceResult)[0];
+    
     console.log(
-        `Balance of ${owner.address}: ${ethers.formatUnits(balance, decimals)} ${symbol}`,
+        `${signer.address}의 잔액: ${ethers.formatUnits(balance, decimals)} ${symbol}`
     );
 }
 
