@@ -1,13 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/******************************************************************************\
-* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
-* EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
-*
-* Implementation of a diamond.
-/******************************************************************************/
-
 import "../libraries/LibDiamond.sol";
 import "../libraries/LibCounter.sol";
 import "../libraries/LibERC20.sol";
@@ -17,11 +10,18 @@ import "../interfaces/IERC173.sol";
 import "../interfaces/IERC165.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-// It is expected that this contract is customized if you want to deploy your diamond
-// with data from a deployment script. Use the init function to initialize state variables
-// of your diamond. Add parameters to the init function if you need to.
-
+/**
+ * @title DiamondInit
+ * @dev Contract used to initialize state variables of a diamond during deployment or upgrade
+ * @notice This contract is expected to be customized to initialize the diamond's state
+ * @notice It is used with the diamond's diamondCut function during initialization
+ */
 contract DiamondInit is Initializable {
+    /**
+     * @dev Initializes the diamond storage with default values
+     * @notice This function can only be called once, enforced by the initializer modifier
+     * @notice Can only be called by the contract owner if the caller is not the diamond itself
+     */
     function init() external initializer {
         // Initialize Diamond Storage
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();

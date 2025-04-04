@@ -135,6 +135,9 @@ importers:
       solidity-coverage:
         specifier: ^0.8.14
         version: 0.8.14(hardhat@2.22.19(ts-node@10.9.2(@types/node@22.13.17)(typescript@5.8.2))(typescript@5.8.2))
+      solidity-docgen:
+        specifier: 0.6.0-beta.36
+        version: 0.6.0-beta.36(hardhat@2.22.19(ts-node@10.9.2(@types/node@22.13.17)(typescript@5.8.2))(typescript@5.8.2))
       ts-node:
         specifier: '>=10.9.2'
         version: 10.9.2(@types/node@22.13.17)(typescript@5.8.2)
@@ -3437,11 +3440,19 @@ packages:
     resolution: {integrity: sha512-WrnG6T+/UduuzSWsSOAbfq1ywLUDwNea3Gd5hg6PS+pLUm8lz2ECNr0beX609clBxmDeZ3676AiA9nPDljmbJQ==}
     hasBin: true
 
+  solidity-ast@0.4.60:
+    resolution: {integrity: sha512-UwhasmQ37ji1ul8cIp0XlrQ/+SVQhy09gGqJH4jnwdo2TgI6YIByzi0PI5QvIGcIdFOs1pbSmJW1pnWB7AVh2w==}
+
   solidity-coverage@0.8.14:
     resolution: {integrity: sha512-ItAAObe5GaEOp20kXC2BZRnph+9P7Rtoqg2mQc2SXGEHgSDF2wWd1Wxz3ntzQWXkbCtIIGdJT918HG00cObwbA==}
     hasBin: true
     peerDependencies:
       hardhat: ^2.11.0
+
+  solidity-docgen@0.6.0-beta.36:
+    resolution: {integrity: sha512-f/I5G2iJgU1h0XrrjRD0hHMr7C10u276vYvm//rw1TzFcYQ4xTOyAoi9oNAHRU0JU4mY9eTuxdVc2zahdMuhaQ==}
+    peerDependencies:
+      hardhat: ^2.8.0
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -4971,7 +4982,7 @@ snapshots:
       '@pnpm/network.ca-file': 1.0.2
       config-chain: 1.1.13
 
-  '@rainbow-me/rainbowkit@0.2.5(ethers@5.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(wagmi@0.4.12(ethers@6.13.5)(immer@10.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
+  '@rainbow-me/rainbowkit@0.2.5(ethers@5.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(wagmi@0.4.12(ethers@5.8.0)(immer@10.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
     dependencies:
       '@vanilla-extract/css': 1.7.0
       '@vanilla-extract/dynamic': 2.0.2
@@ -5796,7 +5807,7 @@ snapshots:
   chain@0.4.0(@babel/core@7.26.10)(immer@10.0.2)(next@15.2.2(@babel/core@7.26.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
     dependencies:
       '@babel/core': 7.26.10
-      '@rainbow-me/rainbowkit': 0.2.5(ethers@5.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(wagmi@0.4.12(ethers@6.13.5)(immer@10.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+      '@rainbow-me/rainbowkit': 0.2.5(ethers@5.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(wagmi@0.4.12(ethers@5.8.0)(immer@10.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@stitches/react': 1.2.6(react@18.3.1)
       ethers: 5.8.0
       next-themes: 0.2.1(next@15.2.2(@babel/core@7.26.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7907,6 +7918,8 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
+  solidity-ast@0.4.60: {}
+
   solidity-coverage@0.8.14(hardhat@2.22.19(ts-node@10.9.2(@types/node@22.13.17)(typescript@5.8.2))(typescript@5.8.2)):
     dependencies:
       '@ethersproject/abi': 5.8.0
@@ -7929,6 +7942,12 @@ snapshots:
       semver: 7.7.1
       shelljs: 0.8.5
       web3-utils: 1.10.4
+
+  solidity-docgen@0.6.0-beta.36(hardhat@2.22.19(ts-node@10.9.2(@types/node@22.13.17)(typescript@5.8.2))(typescript@5.8.2)):
+    dependencies:
+      handlebars: 4.7.8
+      hardhat: 2.22.19(ts-node@10.9.2(@types/node@22.13.17)(typescript@5.8.2))(typescript@5.8.2)
+      solidity-ast: 0.4.60
 
   source-map-js@1.2.1: {}
 

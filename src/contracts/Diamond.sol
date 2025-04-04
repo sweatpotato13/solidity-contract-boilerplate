@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/******************************************************************************\
-* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
-* EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
-*
-* Implementation of a diamond.
-/******************************************************************************/
-
 import {LibDiamond} from "./libraries/LibDiamond.sol";
 import {IDiamondCut} from "./interfaces/IDiamondCut.sol";
 
+/**
+ * @title Diamond
+ * @dev Implementation of the Diamond Standard (EIP-2535)
+ * @notice This contract is the main proxy contract that delegates calls to facet contracts
+ */
 contract Diamond {
+    /**
+     * @dev Constructor that sets up the initial state of the diamond
+     * @param _contractOwner The address that will be set as the contract owner
+     * @param _diamondCutFacet The address of the DiamondCutFacet contract 
+     */
     constructor(address _contractOwner, address _diamondCutFacet) payable {
         LibDiamond.setContractOwner(_contractOwner);
 
@@ -27,8 +30,11 @@ contract Diamond {
         LibDiamond.diamondCut(cut, address(0), "");
     }
 
-    // Find facet for function that is called and execute the
-    // function if a facet is found and return any value.
+    /**
+     * @dev Fallback function that delegates calls to facets
+     * @notice Find facet for function that is called and execute the
+     * function if a facet is found and return any value
+     */
     fallback() external payable {
         LibDiamond.DiamondStorage storage ds;
         bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;
@@ -58,5 +64,9 @@ contract Diamond {
         }
     }
 
+    /**
+     * @dev Function to receive Ether
+     * @notice This contract can receive ETH
+     */
     receive() external payable {}
 }

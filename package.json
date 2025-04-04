@@ -36,6 +36,7 @@
         "test": "pnpm test:hardhat && pnpm test:foundry",
         "test:hardhat": "REPORT_GAS=true npx hardhat test",
         "test:foundry": "forge test",
+        "docgen": "hardhat docgen",
         "pre-commit": "lint-staged",
         "prepare": "husky"
     },
@@ -80,6 +81,7 @@
         "sinon": "^20.0.0",
         "solhint": "^5.0.5",
         "solidity-coverage": "^0.8.14",
+        "solidity-docgen": "0.6.0-beta.36",
         "ts-node": ">=10.9.2",
         "tslint-config-prettier": "^1.18.0",
         "typescript": "5.8.2",
