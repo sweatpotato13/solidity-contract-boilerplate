@@ -15,16 +15,20 @@ import "../interfaces/IDiamondCut.sol";
 import "../interfaces/IDiamondLoupe.sol";
 import "../interfaces/IERC173.sol";
 import "../interfaces/IERC165.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 // It is expected that this contract is customized if you want to deploy your diamond
 // with data from a deployment script. Use the init function to initialize state variables
 // of your diamond. Add parameters to the init function if you need to.
 
-contract DiamondInit {
-    // Initialize function called after diamond is deployed
-    function init() external {
+contract DiamondInit is Initializable {
+    function init() external initializer {
         // Initialize Diamond Storage
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        
+        if (address(this) != msg.sender) {
+            require(msg.sender == ds.contractOwner, "DiamondInit: not owner");
+        }
 
         // Initialize Counter storage
         LibCounter.CounterStorage storage cs = LibCounter.counterStorage();
