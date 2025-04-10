@@ -22,9 +22,12 @@ async function main() {
     const getCountData = counterV2Interface.encodeFunctionData("getCount");
     const countResult = await provider.call({
         to: diamondAddress,
-        data: getCountData
+        data: getCountData,
     });
-    const currentCount = counterV2Interface.decodeFunctionResult("getCount", countResult)[0];
+    const currentCount = counterV2Interface.decodeFunctionResult(
+        "getCount",
+        countResult,
+    )[0];
     console.log("Current counter value:", currentCount);
 
     // Deploy new storage library
@@ -64,35 +67,35 @@ async function main() {
 
     // Execute upgrade (remove then add)
     console.log("Removing existing CounterFacetV2 functions...");
-    
+
     // diamondCut 함수 호출 데이터 인코딩 (remove)
     const removeCutData = diamondCutInterface.encodeFunctionData("diamondCut", [
         [cutRemove],
         ethers.ZeroAddress,
         "0x",
     ]);
-    
+
     // 트랜잭션 전송 (remove)
     const txRemove = await contractOwner.sendTransaction({
         to: diamondAddress,
-        data: removeCutData
+        data: removeCutData,
     });
     await txRemove.wait();
     console.log("Existing CounterFacetV2 functions removed!");
 
     console.log("Adding new CounterFacetV3 functions...");
-    
+
     // diamondCut 함수 호출 데이터 인코딩 (add)
     const addCutData = diamondCutInterface.encodeFunctionData("diamondCut", [
         [cutAdd],
         ethers.ZeroAddress,
         "0x",
     ]);
-    
+
     // 트랜잭션 전송 (add)
     const txAdd = await contractOwner.sendTransaction({
         to: diamondAddress,
-        data: addCutData
+        data: addCutData,
     });
     await txAdd.wait();
     console.log("New CounterFacetV3 functions added!");
@@ -105,7 +108,7 @@ async function main() {
     const initV3Data = counterV3Interface.encodeFunctionData("initializeV3");
     const txInit = await contractOwner.sendTransaction({
         to: diamondAddress,
-        data: initV3Data
+        data: initV3Data,
     });
     await txInit.wait();
     console.log("Storage migration completed!");
@@ -114,32 +117,39 @@ async function main() {
     const getCountV3Data = counterV3Interface.encodeFunctionData("getCount");
     const countV3Result = await provider.call({
         to: diamondAddress,
-        data: getCountV3Data
+        data: getCountV3Data,
     });
-    const count = counterV3Interface.decodeFunctionResult("getCount", countV3Result)[0];
+    const count = counterV3Interface.decodeFunctionResult(
+        "getCount",
+        countV3Result,
+    )[0];
     console.log(
         "Counter value after upgrade (should be preserved):",
         count.toString(),
     );
 
     // Test new functionality - getCounterInfo 호출
-    const getCounterInfoData = counterV3Interface.encodeFunctionData("getCounterInfo");
+    const getCounterInfoData =
+        counterV3Interface.encodeFunctionData("getCounterInfo");
     const counterInfoResult = await provider.call({
         to: diamondAddress,
-        data: getCounterInfoData
+        data: getCounterInfoData,
     });
-    
+
     // 디버깅 정보 출력
     console.log("Raw counterInfoResult:", counterInfoResult);
-    
+
     // 결과 디코딩
-    const counterInfoDecoded = counterV3Interface.decodeFunctionResult("getCounterInfo", counterInfoResult);
+    const counterInfoDecoded = counterV3Interface.decodeFunctionResult(
+        "getCounterInfo",
+        counterInfoResult,
+    );
     console.log("Decoded counterInfo:", counterInfoDecoded);
-    
+
     // counterInfo가 배열이 아닌 객체일 수 있으므로 적절히 처리
     const counterInfo = counterInfoDecoded[0];
     console.log("Extended counter information:");
-    
+
     if (counterInfo && Array.isArray(counterInfo)) {
         console.log("  Counter value:", counterInfo[0]?.toString() || "N/A");
         console.log("  Last incremented:", counterInfo[1] || "N/A");
@@ -147,13 +157,25 @@ async function main() {
         console.log("  Total increments:", counterInfo[3]?.toString() || "N/A");
         console.log("  Total decrements:", counterInfo[4]?.toString() || "N/A");
         console.log("  Last modifier:", counterInfo[5] || "N/A");
-    } else if (counterInfo && typeof counterInfo === 'object') {
+    } else if (counterInfo && typeof counterInfo === "object") {
         // 객체 형태로 반환될 경우
         console.log("  Counter value:", counterInfo.count?.toString() || "N/A");
-        console.log("  Last incremented:", counterInfo.lastIncremented || "N/A");
-        console.log("  Last decremented:", counterInfo.lastDecremented || "N/A");
-        console.log("  Total increments:", counterInfo.totalIncrements?.toString() || "N/A");
-        console.log("  Total decrements:", counterInfo.totalDecrements?.toString() || "N/A");
+        console.log(
+            "  Last incremented:",
+            counterInfo.lastIncremented || "N/A",
+        );
+        console.log(
+            "  Last decremented:",
+            counterInfo.lastDecremented || "N/A",
+        );
+        console.log(
+            "  Total increments:",
+            counterInfo.totalIncrements?.toString() || "N/A",
+        );
+        console.log(
+            "  Total decrements:",
+            counterInfo.totalDecrements?.toString() || "N/A",
+        );
         console.log("  Last modifier:", counterInfo.lastModifier || "N/A");
     } else {
         console.log("  Unable to parse counter info:", counterInfo);
@@ -164,7 +186,7 @@ async function main() {
     const incrementData = counterV3Interface.encodeFunctionData("increment");
     const txIncrement = await contractOwner.sendTransaction({
         to: diamondAddress,
-        data: incrementData
+        data: incrementData,
     });
     await txIncrement.wait();
 
@@ -172,23 +194,34 @@ async function main() {
     const updatedCountData = counterV3Interface.encodeFunctionData("getCount");
     const updatedCountResult = await provider.call({
         to: diamondAddress,
-        data: updatedCountData
+        data: updatedCountData,
     });
-    const updatedCount = counterV3Interface.decodeFunctionResult("getCount", updatedCountResult)[0];
-    
-    const totalIncrementsData = counterV3Interface.encodeFunctionData("getTotalIncrements");
+    const updatedCount = counterV3Interface.decodeFunctionResult(
+        "getCount",
+        updatedCountResult,
+    )[0];
+
+    const totalIncrementsData =
+        counterV3Interface.encodeFunctionData("getTotalIncrements");
     const totalIncrementsResult = await provider.call({
         to: diamondAddress,
-        data: totalIncrementsData
+        data: totalIncrementsData,
     });
-    const totalIncrements = counterV3Interface.decodeFunctionResult("getTotalIncrements", totalIncrementsResult)[0];
-    
-    const lastModifierData = counterV3Interface.encodeFunctionData("getLastModifier");
+    const totalIncrements = counterV3Interface.decodeFunctionResult(
+        "getTotalIncrements",
+        totalIncrementsResult,
+    )[0];
+
+    const lastModifierData =
+        counterV3Interface.encodeFunctionData("getLastModifier");
     const lastModifierResult = await provider.call({
         to: diamondAddress,
-        data: lastModifierData
+        data: lastModifierData,
     });
-    const lastModifier = counterV3Interface.decodeFunctionResult("getLastModifier", lastModifierResult)[0];
+    const lastModifier = counterV3Interface.decodeFunctionResult(
+        "getLastModifier",
+        lastModifierResult,
+    )[0];
 
     console.log("Counter value after increment:", updatedCount.toString());
     console.log("Total increments:", totalIncrements.toString());

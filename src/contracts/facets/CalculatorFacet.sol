@@ -17,7 +17,7 @@ contract CalculatorFacet {
      * @param newResult The result after the operation
      */
     event OperationPerformed(string operation, int256 value, int256 newResult);
-    
+
     /**
      * @dev Emitted when the result is reset to zero
      * @param operator The address that performed the reset

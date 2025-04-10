@@ -57,35 +57,35 @@ async function main() {
 
     // Execute upgrade (remove then add)
     console.log("Removing existing CounterFacet functions...");
-    
+
     // diamondCut 함수 호출 데이터 인코딩 (remove)
     const removeCutData = diamondCutInterface.encodeFunctionData("diamondCut", [
         [cutRemove],
         ethers.ZeroAddress,
         "0x",
     ]);
-    
+
     // 트랜잭션 전송 (remove)
     const txRemove = await contractOwner.sendTransaction({
         to: diamondAddress,
-        data: removeCutData
+        data: removeCutData,
     });
     await txRemove.wait();
     console.log("Existing CounterFacet functions removed!");
 
     console.log("Adding new CounterFacetV2 functions...");
-    
+
     // diamondCut 함수 호출 데이터 인코딩 (add)
     const addCutData = diamondCutInterface.encodeFunctionData("diamondCut", [
         [cutAdd],
         ethers.ZeroAddress,
         "0x",
     ]);
-    
+
     // 트랜잭션 전송 (add)
     const txAdd = await contractOwner.sendTransaction({
         to: diamondAddress,
-        data: addCutData
+        data: addCutData,
     });
     await txAdd.wait();
     console.log("New CounterFacetV2 functions added!");
@@ -97,18 +97,27 @@ async function main() {
     const getCountData = counterV2Interface.encodeFunctionData("getCount");
     const countResult = await provider.call({
         to: diamondAddress,
-        data: getCountData
+        data: getCountData,
     });
-    const count = counterV2Interface.decodeFunctionResult("getCount", countResult)[0];
+    const count = counterV2Interface.decodeFunctionResult(
+        "getCount",
+        countResult,
+    )[0];
     console.log("Current counter value:", count);
 
     // Test new function - isMultipleOf(2) 호출
-    const isMultipleOfData = counterV2Interface.encodeFunctionData("isMultipleOf", [2]);
+    const isMultipleOfData = counterV2Interface.encodeFunctionData(
+        "isMultipleOf",
+        [2],
+    );
     const isMultipleResult = await provider.call({
         to: diamondAddress,
-        data: isMultipleOfData
+        data: isMultipleOfData,
     });
-    const isMultipleOfTwo = counterV2Interface.decodeFunctionResult("isMultipleOf", isMultipleResult)[0];
+    const isMultipleOfTwo = counterV2Interface.decodeFunctionResult(
+        "isMultipleOf",
+        isMultipleResult,
+    )[0];
     console.log("Is counter a multiple of 2?", isMultipleOfTwo);
 
     console.log("=== Counter Facet Upgrade Completed ===");

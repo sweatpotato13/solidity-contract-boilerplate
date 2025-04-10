@@ -188,7 +188,7 @@ contract CounterFacetV3 {
      * @param modifierAddress The address that performed the increment
      */
     event CounterIncremented(uint256 newCount, uint256 totalIncrements, address modifierAddress);
-    
+
     /**
      * @dev Emitted when counter is decremented
      * @param newCount The new counter value after decrementing
@@ -196,7 +196,7 @@ contract CounterFacetV3 {
      * @param modifierAddress The address that performed the decrement
      */
     event CounterDecremented(uint256 newCount, uint256 totalDecrements, address modifierAddress);
-    
+
     /**
      * @dev Emitted when counter is set to a new value
      * @param oldCount The previous counter value

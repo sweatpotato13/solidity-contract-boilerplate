@@ -92,13 +92,13 @@ contract CounterFacetV2 {
      * @param newCount The new counter value after incrementing
      */
     event CounterIncremented(uint256 newCount);
-    
+
     /**
      * @dev Emitted when counter is decremented
      * @param newCount The new counter value after decrementing
      */
     event CounterDecremented(uint256 newCount);
-    
+
     /**
      * @dev Emitted when counter is set to a new value
      * @param oldCount The previous counter value

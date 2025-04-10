@@ -25,7 +25,7 @@ contract DiamondInit is Initializable {
     function init() external initializer {
         // Initialize Diamond Storage
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-        
+
         if (address(this) != msg.sender) {
             require(msg.sender == ds.contractOwner, "DiamondInit: not owner");
         }

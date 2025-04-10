@@ -13,7 +13,7 @@ contract Diamond {
     /**
      * @dev Constructor that sets up the initial state of the diamond
      * @param _contractOwner The address that will be set as the contract owner
-     * @param _diamondCutFacet The address of the DiamondCutFacet contract 
+     * @param _diamondCutFacet The address of the DiamondCutFacet contract
      */
     constructor(address _contractOwner, address _diamondCutFacet) payable {
         LibDiamond.setContractOwner(_contractOwner);
