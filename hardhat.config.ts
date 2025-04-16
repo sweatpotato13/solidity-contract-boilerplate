@@ -11,10 +11,12 @@ import type { HardhatUserConfig } from "hardhat/config";
 
 dotenv.config();
 
+const FORK_ENABLED = process.env.FORK_ENABLED === "true";
+
 const config: HardhatUserConfig = {
     defaultNetwork: "hardhat",
     solidity: {
-        version: "0.8.20",
+        version: "0.8.26",
         settings: {
             optimizer: {
                 enabled: true,
@@ -26,7 +28,14 @@ const config: HardhatUserConfig = {
         deployer: 0,
     },
     networks: {
-        hardhat: {},
+        hardhat: {
+            forking: FORK_ENABLED
+                ? {
+                      url: `https://eth.llamarpc.com`,
+                      blockNumber: 22278736,
+                  }
+                : undefined,
+        },
         local: {
             url: `http://127.0.0.1:8545`,
             accounts: [
