@@ -43,9 +43,12 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
      * @param _facet The facet address to query
      * @return facetFunctionSelectors_ Array of function selectors
      */
-    function facetFunctionSelectors(
-        address _facet
-    ) external view override returns (bytes4[] memory facetFunctionSelectors_) {
+    function facetFunctionSelectors(address _facet)
+        external
+        view
+        override
+        returns (bytes4[] memory facetFunctionSelectors_)
+    {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         facetFunctionSelectors_ = ds.facetFunctionSelectors[_facet].functionSelectors;
     }

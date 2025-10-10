@@ -22,6 +22,7 @@ cache
 artifacts
 typechain-types
 deployments
+types
 
 # IDE
 .history

@@ -131,14 +131,8 @@ contract CounterFacetV3 {
         )
     {
         LibCounterV2.CounterStorage storage cs = getCounterStorage();
-        return (
-            cs.count,
-            cs.lastIncremented,
-            cs.lastDecremented,
-            cs.totalIncrements,
-            cs.totalDecrements,
-            cs.lastModifier
-        );
+        return
+            (cs.count, cs.lastIncremented, cs.lastDecremented, cs.totalIncrements, cs.totalDecrements, cs.lastModifier);
     }
 
     /**
