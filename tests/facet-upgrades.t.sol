@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
-// Diamond 관련 컨트랙트들 임포트
+// Import Diamond-related contracts
 import {Diamond} from "../src/Diamond.sol";
 import {DiamondCutFacet} from "../src/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "../src/facets/DiamondLoupeFacet.sol";
@@ -17,7 +17,7 @@ import {DiamondInit} from "../src/upgradeInitializers/DiamondInit.sol";
 import {IDiamondCut} from "../src/interfaces/IDiamondCut.sol";
 
 contract FacetUpgradesTest is Test {
-    // 컨트랙트 변수들
+    // Contract variables
     Diamond diamond;
     DiamondCutFacet diamondCutFacet;
     DiamondLoupeFacet diamondLoupeFacet;
@@ -26,12 +26,12 @@ contract FacetUpgradesTest is Test {
     ERC20Facet erc20Facet;
     DiamondInit diamondInit;
 
-    // 주소들
+    // Addresses
     address owner;
     address user1;
     address user2;
 
-    // Facet 셀렉터 관리 함수들
+    // Facet selector management functions
     function getSelector(string memory _func) internal pure returns (bytes4) {
         return bytes4(keccak256(bytes(_func)));
     }
@@ -44,28 +44,28 @@ contract FacetUpgradesTest is Test {
         return selectors;
     }
 
-    // 테스트 셋업 (배포)
+    // Test setup (deployment)
     function setUp() public {
         owner = address(this);
         user1 = address(0x123);
         user2 = address(0x456);
 
-        // DiamondCutFacet 배포
+        // Deploy DiamondCutFacet
         diamondCutFacet = new DiamondCutFacet();
 
-        // Diamond 배포
+        // Deploy Diamond
         diamond = new Diamond(owner, address(diamondCutFacet));
 
-        // DiamondInit 배포
+        // Deploy DiamondInit
         diamondInit = new DiamondInit();
 
-        // 각 Facet 배포
+        // Deploy each Facet
         diamondLoupeFacet = new DiamondLoupeFacet();
         ownershipFacet = new OwnershipFacet();
         counterFacet = new CounterFacet();
         erc20Facet = new ERC20Facet();
 
-        // 각 facet의 함수 시그니처 준비
+        // Prepare function signatures for each facet
         string[] memory diamondLoupeFunctions = new string[](5);
         diamondLoupeFunctions[0] = "facets()";
         diamondLoupeFunctions[1] = "facetFunctionSelectors(address)";
@@ -97,7 +97,7 @@ contract FacetUpgradesTest is Test {
         erc20Functions[10] = "mint(address,uint256)";
         erc20Functions[11] = "burn(address,uint256)";
 
-        // Facet 추가를 위한 다이아몬드 컷 준비
+        // Prepare diamond cut for adding facets
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](4);
 
         cut[0] = IDiamondCut.FacetCut({
@@ -124,31 +124,31 @@ contract FacetUpgradesTest is Test {
             functionSelectors: getSelectors(erc20Functions)
         });
 
-        // 초기화 함수 데이터 준비
+        // Prepare initialization function data
         bytes memory functionCall = abi.encodeWithSignature("init()");
 
-        // 다이아몬드 컷 실행
+        // Execute diamond cut
         IDiamondCut(address(diamond)).diamondCut(cut, address(diamondInit), functionCall);
 
-        // 프록시를 통해 컨트랙트 인터페이스 생성
+        // Create contract interfaces through proxy
         diamondLoupeFacet = DiamondLoupeFacet(address(diamond));
         ownershipFacet = OwnershipFacet(address(diamond));
         counterFacet = CounterFacet(address(diamond));
         erc20Facet = ERC20Facet(address(diamond));
     }
 
-    // CounterFacet -> CounterFacetV2 업그레이드 테스트
+    // Test upgrade from CounterFacet to CounterFacetV2
     function testUpgradeToCounterV2() public {
-        // 초기 카운터 값 설정
+        // Set initial counter value
         counterFacet.increment();
         counterFacet.increment();
         uint256 initialCount = counterFacet.getCount();
         assertEq(initialCount, 2);
 
-        // CounterFacetV2 배포
+        // Deploy CounterFacetV2
         CounterFacetV2 counterFacetV2 = new CounterFacetV2();
 
-        // 기존 셀렉터 가져오기
+        // Get existing selectors
         string[] memory counterFunctions = new string[](4);
         counterFunctions[0] = "getCount()";
         counterFunctions[1] = "increment()";
@@ -156,7 +156,7 @@ contract FacetUpgradesTest is Test {
         counterFunctions[3] = "setCount(uint256)";
         bytes4[] memory selectorsToRemove = getSelectors(counterFunctions);
 
-        // V2 셀렉터 가져오기
+        // Get V2 selectors
         string[] memory counterV2Functions = new string[](6);
         counterV2Functions[0] = "getCount()";
         counterV2Functions[1] = "increment()";
@@ -174,7 +174,7 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(removeCut, address(0), "");
 
-        // 새 셀렉터 추가
+        // Add new selectors
         IDiamondCut.FacetCut[] memory addCut = new IDiamondCut.FacetCut[](1);
         addCut[0] = IDiamondCut.FacetCut({
             facetAddress: address(counterFacetV2),
@@ -184,40 +184,40 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(addCut, address(0), "");
 
-        // V2 인터페이스로 다이아몬드 호출
+        // Call diamond with V2 interface
         CounterFacetV2 counterV2OnDiamond = CounterFacetV2(address(diamond));
 
-        // 카운터 값이 보존되었는지 확인
+        // Verify counter value is preserved
         uint256 countV2 = counterV2OnDiamond.getCount();
         assertEq(countV2, initialCount);
 
-        // V2 함수 테스트
+        // Test V2 functions
         bool isMultipleOf2 = counterV2OnDiamond.isMultipleOf(2);
         assertEq(isMultipleOf2, true);
 
         bool isMultipleOf3 = counterV2OnDiamond.isMultipleOf(3);
         assertEq(isMultipleOf3, false);
 
-        // doubleIncrement 테스트
+        // Test doubleIncrement
         counterV2OnDiamond.doubleIncrement();
         uint256 doubledCount = counterV2OnDiamond.getCount();
         assertEq(doubledCount, initialCount + 2);
     }
 
-    // CounterFacet -> CounterFacetV2 -> CounterFacetV3 (스토리지 레이아웃 변경) 테스트
+    // Test upgrade from CounterFacet -> CounterFacetV2 -> CounterFacetV3 (storage layout changes)
     function testUpgradeToCounterV3WithStorageChanges() public {
-        // 초기 카운터 값 설정
+        // Set initial counter value
         counterFacet.increment();
         counterFacet.increment();
         counterFacet.increment();
         uint256 initialCount = counterFacet.getCount();
         assertEq(initialCount, 3);
 
-        // CounterFacetV2 배포
+        // Deploy CounterFacetV2
         CounterFacetV2 counterFacetV2 = new CounterFacetV2();
 
-        // V1 -> V2 업그레이드
-        // 기존 셀렉터 제거
+        // Upgrade V1 -> V2
+        // Remove existing selectors
         string[] memory counterFunctions = new string[](4);
         counterFunctions[0] = "getCount()";
         counterFunctions[1] = "increment()";
@@ -233,7 +233,7 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(removeV1, address(0), "");
 
-        // V2 셀렉터 추가
+        // Add V2 selectors
         string[] memory counterV2Functions = new string[](6);
         counterV2Functions[0] = "getCount()";
         counterV2Functions[1] = "increment()";
@@ -251,16 +251,16 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(addV2, address(0), "");
 
-        // V2 카운터 값 확인
+        // Verify V2 counter value
         CounterFacetV2 counterV2 = CounterFacetV2(address(diamond));
         uint256 v2Count = counterV2.getCount();
         assertEq(v2Count, initialCount);
 
-        // CounterFacetV3 배포 (완전히 다른 스토리지 레이아웃)
+        // Deploy CounterFacetV3 (completely different storage layout)
         CounterFacetV3 counterFacetV3 = new CounterFacetV3();
 
-        // V2 -> V3 업그레이드
-        // V2 셀렉터 제거
+        // Upgrade V2 -> V3
+        // Remove V2 selectors
         IDiamondCut.FacetCut[] memory removeV2 = new IDiamondCut.FacetCut[](1);
         removeV2[0] = IDiamondCut.FacetCut({
             facetAddress: address(0),
@@ -270,7 +270,7 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(removeV2, address(0), "");
 
-        // V3 셀렉터 추가
+        // Add V3 selectors
         string[] memory counterV3Functions = new string[](5);
         counterV3Functions[0] = "getCount()";
         counterV3Functions[1] = "increment()";
@@ -287,35 +287,35 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(addV3, address(0), "");
 
-        // V3 초기화 함수 호출 (V1/V2 스토리지 -> V3 스토리지로 마이그레이션)
+        // Call V3 initialization function (migrate V1/V2 storage -> V3 storage)
         CounterFacetV3 counterV3 = CounterFacetV3(address(diamond));
         counterV3.initializeV3();
 
-        // V3 기능 테스트
+        // Test V3 functionality
         counterV3.increment();
 
-        // V3 increment는 카운트에 3을 더함
+        // V3 increment adds 3 to count
         uint256 incrementedCount = counterV3.getCount();
         assertEq(incrementedCount, v2Count + 3);
     }
 
-    // CalculatorFacet 추가 테스트
+    // Test adding CalculatorFacet
     function testAddCalculatorFacet() public {
-        // CalculatorFacet 배포
+        // Deploy CalculatorFacet
         CalculatorFacet calculatorFacet = new CalculatorFacet();
 
-        // 실제 함수 시그니처로 수정 - 인자 타입도 명확히
+        // Update to actual function signatures - clarify argument types
         string[] memory calculatorFunctions = new string[](8);
         calculatorFunctions[0] = "getResult()";
-        calculatorFunctions[1] = "setValue(int256)"; // uint256 -> int256
-        calculatorFunctions[2] = "add(int256)"; // uint256 -> int256
-        calculatorFunctions[3] = "subtract(int256)"; // uint256 -> int256
-        calculatorFunctions[4] = "multiply(int256)"; // uint256 -> int256
-        calculatorFunctions[5] = "divide(int256)"; // uint256 -> int256
+        calculatorFunctions[1] = "setValue(int256)";
+        calculatorFunctions[2] = "add(int256)";
+        calculatorFunctions[3] = "subtract(int256)";
+        calculatorFunctions[4] = "multiply(int256)";
+        calculatorFunctions[5] = "divide(int256)";
         calculatorFunctions[6] = "getOperationCount()";
         calculatorFunctions[7] = "getLastOperator()";
 
-        // CalculatorFacet 추가
+        // Add CalculatorFacet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
         cut[0] = IDiamondCut.FacetCut({
             facetAddress: address(calculatorFacet),
@@ -325,17 +325,17 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(cut, address(0), "");
 
-        // 계산기 인터페이스로 다이아몬드 호출
+        // Call diamond with calculator interface
         CalculatorFacet calculator = CalculatorFacet(address(diamond));
 
-        // 초기값 확인
+        // Verify initial value
         int256 initialValue = calculator.getResult();
         assertEq(initialValue, 0);
 
-        // 값을 10으로 설정
+        // Set value to 10
         calculator.setValue(10);
 
-        // 기본 연산 테스트
+        // Test basic operations
         calculator.add(5);
         int256 result = calculator.getResult();
         assertEq(result, 15);
@@ -352,38 +352,38 @@ contract FacetUpgradesTest is Test {
         result = calculator.getResult();
         assertEq(result, 6);
 
-        // 연산 횟수 확인
+        // Verify operation count
         uint256 opCount = calculator.getOperationCount();
         assertEq(opCount, 4);
 
-        // 마지막 연산자 확인
+        // Verify last operator
         address lastOperator = calculator.getLastOperator();
         assertEq(lastOperator, owner);
     }
 
-    // 여러 Facet 추가/제거 테스트
+    // Test multiple facet additions and removals
     function testMultipleFacetAdditionsAndRemovals() public {
-        // 함수 시그니처 수정
+        // Update function signatures
         string[] memory calculatorFunctions = new string[](8);
         calculatorFunctions[0] = "getResult()";
-        calculatorFunctions[1] = "setValue(int256)"; // 수정
-        calculatorFunctions[2] = "add(int256)"; // 수정
-        calculatorFunctions[3] = "subtract(int256)"; // 수정
-        calculatorFunctions[4] = "multiply(int256)"; // 수정
-        calculatorFunctions[5] = "divide(int256)"; // 수정
+        calculatorFunctions[1] = "setValue(int256)";
+        calculatorFunctions[2] = "add(int256)";
+        calculatorFunctions[3] = "subtract(int256)";
+        calculatorFunctions[4] = "multiply(int256)";
+        calculatorFunctions[5] = "divide(int256)";
         calculatorFunctions[6] = "getOperationCount()";
         calculatorFunctions[7] = "getLastOperator()";
 
-        // 원래 facet 수 확인
+        // Verify original facet count
         address[] memory originalFacets = diamondLoupeFacet.facetAddresses();
         uint256 originalFacetCount = originalFacets.length;
 
-        // CalculatorFacet 배포
+        // Deploy CalculatorFacet
         CalculatorFacet calculatorFacet = new CalculatorFacet();
 
         bytes4[] memory calculatorSelectors = getSelectors(calculatorFunctions);
 
-        // CalculatorFacet 추가
+        // Add CalculatorFacet
         IDiamondCut.FacetCut[] memory addCut = new IDiamondCut.FacetCut[](1);
         addCut[0] = IDiamondCut.FacetCut({
             facetAddress: address(calculatorFacet),
@@ -393,11 +393,11 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(addCut, address(0), "");
 
-        // 추가 확인
+        // Verify addition
         address[] memory withCalculatorFacets = diamondLoupeFacet.facetAddresses();
         assertEq(withCalculatorFacets.length, originalFacetCount + 1);
 
-        // CalculatorFacet 제거
+        // Remove CalculatorFacet
         IDiamondCut.FacetCut[] memory removeCut = new IDiamondCut.FacetCut[](1);
         removeCut[0] = IDiamondCut.FacetCut({
             facetAddress: address(0), action: IDiamondCut.FacetCutAction.Remove, functionSelectors: calculatorSelectors
@@ -405,32 +405,32 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(removeCut, address(0), "");
 
-        // 제거 확인
+        // Verify removal
         address[] memory afterRemovalFacets = diamondLoupeFacet.facetAddresses();
         assertEq(afterRemovalFacets.length, originalFacetCount);
 
-        // 셀렉터가 제거되었는지 확인
+        // Verify selectors are removed
         for (uint256 i = 0; i < calculatorSelectors.length; i++) {
             address facetAddress = diamondLoupeFacet.facetAddress(calculatorSelectors[i]);
             assertEq(facetAddress, address(0));
         }
     }
 
-    // 단일 함수 교체 테스트
+    // Test replacing a single function
     function testReplaceSingleFunction() public {
-        // 초기 카운터 값 설정
+        // Set initial counter value
         counterFacet.increment();
         counterFacet.increment();
         uint256 initialCount = counterFacet.getCount();
         assertEq(initialCount, 2);
 
-        // CounterFacetV2 배포
+        // Deploy CounterFacetV2
         CounterFacetV2 counterV2 = new CounterFacetV2();
 
-        // increment 함수만 교체
+        // Replace only increment function
         bytes4 incrementSelector = counterV2.increment.selector;
 
-        // increment 함수 교체 - bytes4[]로 올바르게 변환
+        // Replace increment function - properly convert to bytes4[]
         bytes4[] memory selectors = new bytes4[](1);
         selectors[0] = incrementSelector;
 
@@ -441,23 +441,23 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(replaceCut, address(0), "");
 
-        // 교체된 increment 함수 호출 (V2 버전은 2씩 증가)
+        // Call replaced increment function (V2 version increments by 2)
         counterFacet.increment();
 
-        // 결과 확인 - 2 증가해야 함
+        // Verify result - should increase by 2
         uint256 newCount = counterFacet.getCount();
         assertEq(newCount, initialCount + 2);
     }
 
-    // 여러 작업을 동시에 수행하는 Diamond Cut 테스트
+    // Test Diamond Cut performing multiple operations simultaneously
     function testMultipleOperationDiamondCut() public {
-        // CalculatorFacet 배포
+        // Deploy CalculatorFacet
         CalculatorFacet calculatorFacet = new CalculatorFacet();
 
-        // CounterFacetV2 배포
+        // Deploy CounterFacetV2
         CounterFacetV2 counterV2 = new CounterFacetV2();
 
-        // 기존 Counter 셀렉터
+        // Existing Counter selectors
         string[] memory counterFunctions = new string[](4);
         counterFunctions[0] = "getCount()";
         counterFunctions[1] = "increment()";
@@ -465,7 +465,7 @@ contract FacetUpgradesTest is Test {
         counterFunctions[3] = "setCount(uint256)";
         bytes4[] memory counterSelectors = getSelectors(counterFunctions);
 
-        // CounterV2 셀렉터
+        // CounterV2 selectors
         string[] memory counterV2Functions = new string[](6);
         counterV2Functions[0] = "getCount()";
         counterV2Functions[1] = "increment()";
@@ -475,57 +475,57 @@ contract FacetUpgradesTest is Test {
         counterV2Functions[5] = "isMultipleOf(uint256)";
         bytes4[] memory counterV2Selectors = getSelectors(counterV2Functions);
 
-        // Calculator 셀렉터 - 함수 시그니처 수정
+        // Calculator selectors - update function signatures
         string[] memory calculatorFunctions = new string[](8);
         calculatorFunctions[0] = "getResult()";
-        calculatorFunctions[1] = "setValue(int256)"; // 수정
-        calculatorFunctions[2] = "add(int256)"; // 수정
-        calculatorFunctions[3] = "subtract(int256)"; // 수정
-        calculatorFunctions[4] = "multiply(int256)"; // 수정
-        calculatorFunctions[5] = "divide(int256)"; // 수정
+        calculatorFunctions[1] = "setValue(int256)";
+        calculatorFunctions[2] = "add(int256)";
+        calculatorFunctions[3] = "subtract(int256)";
+        calculatorFunctions[4] = "multiply(int256)";
+        calculatorFunctions[5] = "divide(int256)";
         calculatorFunctions[6] = "getOperationCount()";
         calculatorFunctions[7] = "getLastOperator()";
         bytes4[] memory calculatorSelectors = getSelectors(calculatorFunctions);
 
-        // 여러 작업이 포함된 다이아몬드 컷 준비
+        // Prepare diamond cut with multiple operations
         IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](3);
 
-        // 기존 Counter 제거
+        // Remove existing Counter
         cuts[0] = IDiamondCut.FacetCut({
             facetAddress: address(0), action: IDiamondCut.FacetCutAction.Remove, functionSelectors: counterSelectors
         });
 
-        // CounterV2 추가
+        // Add CounterV2
         cuts[1] = IDiamondCut.FacetCut({
             facetAddress: address(counterV2),
             action: IDiamondCut.FacetCutAction.Add,
             functionSelectors: counterV2Selectors
         });
 
-        // Calculator 추가
+        // Add Calculator
         cuts[2] = IDiamondCut.FacetCut({
             facetAddress: address(calculatorFacet),
             action: IDiamondCut.FacetCutAction.Add,
             functionSelectors: calculatorSelectors
         });
 
-        // 다이아몬드 컷 실행
+        // Execute diamond cut
         IDiamondCut(address(diamond)).diamondCut(cuts, address(0), "");
 
-        // 모든 작업이 성공했는지 확인
-        // 1. CounterV2 작동 확인
+        // Verify all operations succeeded
+        // 1. Verify CounterV2 works
         CounterFacetV2 counterV2OnDiamond = CounterFacetV2(address(diamond));
         counterV2OnDiamond.increment();
         uint256 count = counterV2OnDiamond.getCount();
-        assertEq(count, 2); // V2의 increment는 2씩 증가
+        assertEq(count, 2); // V2's increment increases by 2
 
-        // 2. Calculator 작동 확인 - int256으로 타입 변경
+        // 2. Verify Calculator works - change type to int256
         CalculatorFacet calculatorOnDiamond = CalculatorFacet(address(diamond));
         calculatorOnDiamond.add(10);
         int256 result = calculatorOnDiamond.getResult();
         assertEq(result, 10);
 
-        // 3. 이전 Counter 함수가 CounterV2 주소로 대체되었는지 확인
+        // 3. Verify previous Counter functions are replaced with CounterV2 address
         bytes4 incrementSelector = counterV2.increment.selector;
         address facetAddressForIncrement = diamondLoupeFacet.facetAddress(incrementSelector);
         assertEq(facetAddressForIncrement, address(counterV2));

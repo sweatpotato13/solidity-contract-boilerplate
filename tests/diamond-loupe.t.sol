@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
-// Diamond 관련 컨트랙트들 임포트
+// Import Diamond-related contracts
 import {Diamond} from "../src/Diamond.sol";
 import {DiamondCutFacet} from "../src/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "../src/facets/DiamondLoupeFacet.sol";
@@ -16,7 +16,7 @@ import {IDiamondLoupe} from "../src/interfaces/IDiamondLoupe.sol";
 import {IERC165} from "../src/interfaces/IERC165.sol";
 
 contract DiamondLoupeTest is Test {
-    // 컨트랙트 변수들
+    // Contract variables
     Diamond diamond;
     DiamondCutFacet diamondCutFacet;
     DiamondLoupeFacet diamondLoupeFacet;
@@ -25,19 +25,19 @@ contract DiamondLoupeTest is Test {
     ERC20Facet erc20Facet;
     DiamondInit diamondInit;
 
-    // 인터페이스 IDs - 정확한 값으로 수정
+    // Interface IDs - corrected to exact values
     bytes4 constant ERC165_INTERFACE_ID = 0x01ffc9a7;
     bytes4 constant DIAMOND_LOUPE_INTERFACE_ID = 0x48e2b093;
     bytes4 constant DIAMOND_CUT_INTERFACE_ID = 0x1f931c1c;
 
-    // 주소들
+    // Addresses
     address owner;
     address[] facetAddresses;
 
-    // 셀렉터-주소 매핑
+    // Selector-to-address mapping
     mapping(bytes4 => address) selectorToFacetMap;
 
-    // Facet 셀렉터 관리 함수들
+    // Facet selector management functions
     function getSelector(string memory _func) internal pure returns (bytes4) {
         return bytes4(keccak256(bytes(_func)));
     }
@@ -50,26 +50,26 @@ contract DiamondLoupeTest is Test {
         return selectors;
     }
 
-    // 테스트 셋업 (배포)
+    // Test setup (deployment)
     function setUp() public {
         owner = address(this);
 
-        // DiamondCutFacet 배포
+        // Deploy DiamondCutFacet
         diamondCutFacet = new DiamondCutFacet();
 
-        // Diamond 배포
+        // Deploy Diamond
         diamond = new Diamond(owner, address(diamondCutFacet));
 
-        // DiamondInit 배포
+        // Deploy DiamondInit
         diamondInit = new DiamondInit();
 
-        // 각 Facet 배포
+        // Deploy each Facet
         diamondLoupeFacet = new DiamondLoupeFacet();
         ownershipFacet = new OwnershipFacet();
         counterFacet = new CounterFacet();
         erc20Facet = new ERC20Facet();
 
-        // 각 facet의 함수 시그니처 준비
+        // Prepare function signatures for each facet
         string[] memory diamondLoupeFunctions = new string[](5);
         diamondLoupeFunctions[0] = "facets()";
         diamondLoupeFunctions[1] = "facetFunctionSelectors(address)";
@@ -101,13 +101,13 @@ contract DiamondLoupeTest is Test {
         erc20Functions[10] = "mint(address,uint256)";
         erc20Functions[11] = "burn(address,uint256)";
 
-        // 셀렉터 얻기
+        // Get selectors
         bytes4[] memory loupeSelectors = getSelectors(diamondLoupeFunctions);
         bytes4[] memory ownershipSelectors = getSelectors(ownershipFunctions);
         bytes4[] memory counterSelectors = getSelectors(counterFunctions);
         bytes4[] memory erc20Selectors = getSelectors(erc20Functions);
 
-        // 셀렉터-주소 매핑 생성
+        // Create selector-to-address mapping
         for (uint256 i = 0; i < loupeSelectors.length; i++) {
             selectorToFacetMap[loupeSelectors[i]] = address(diamondLoupeFacet);
         }
@@ -121,13 +121,13 @@ contract DiamondLoupeTest is Test {
             selectorToFacetMap[erc20Selectors[i]] = address(erc20Facet);
         }
 
-        // facet 주소 저장
+        // Store facet addresses
         facetAddresses.push(address(diamondLoupeFacet));
         facetAddresses.push(address(ownershipFacet));
         facetAddresses.push(address(counterFacet));
         facetAddresses.push(address(erc20Facet));
 
-        // Facet 추가를 위한 다이아몬드 컷 준비
+        // Prepare diamond cut for adding facets
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](4);
 
         cut[0] = IDiamondCut.FacetCut({
@@ -152,59 +152,59 @@ contract DiamondLoupeTest is Test {
             facetAddress: address(erc20Facet), action: IDiamondCut.FacetCutAction.Add, functionSelectors: erc20Selectors
         });
 
-        // 초기화 함수 데이터 준비
+        // Prepare initialization function data
         bytes memory functionCall = abi.encodeWithSignature("init()");
 
-        // 다이아몬드 컷 실행
+        // Execute diamond cut
         IDiamondCut(address(diamond)).diamondCut(cut, address(diamondInit), functionCall);
 
-        // 프록시를 통해 컨트랙트 인터페이스 생성
+        // Create contract interfaces through proxy
         diamondLoupeFacet = DiamondLoupeFacet(address(diamond));
     }
 
-    // facets() 테스트
+    // Test facets()
     function testFacets() public view {
         IDiamondLoupe.Facet[] memory facets = diamondLoupeFacet.facets();
 
-        // DiamondCutFacet + 4개 facet = 5개
+        // DiamondCutFacet + 4 facets = 5 total
         assertEq(facets.length, 5);
 
-        // 각 facet은 유효한 주소와 셀렉터를 가져야 함
+        // Each facet should have a valid address and selectors
         for (uint256 i = 0; i < facets.length; i++) {
             assertTrue(facets[i].facetAddress != address(0));
             assertTrue(facets[i].functionSelectors.length > 0);
         }
     }
 
-    // facetFunctionSelectors() 테스트
+    // Test facetFunctionSelectors()
     function testFacetFunctionSelectors() public view {
-        // 각 facet 주소에 대해 테스트
+        // Test for each facet address
         for (uint256 i = 0; i < facetAddresses.length; i++) {
             address facetAddress = facetAddresses[i];
             bytes4[] memory selectors = diamondLoupeFacet.facetFunctionSelectors(facetAddress);
 
-            // 셀렉터가 존재해야 함
+            // Selectors should exist
             assertTrue(selectors.length > 0);
         }
     }
 
-    // 존재하지 않는 facet 주소에 대한 테스트
+    // Test for non-existent facet address
     function testFacetFunctionSelectorsForNonExistentAddress() public view {
         address nonExistentAddress = address(0x1);
         bytes4[] memory selectors = diamondLoupeFacet.facetFunctionSelectors(nonExistentAddress);
 
-        // 빈 배열을 반환해야 함
+        // Should return empty array
         assertEq(selectors.length, 0);
     }
 
-    // facetAddresses() 테스트
+    // Test facetAddresses()
     function testFacetAddresses() public view {
         address[] memory addresses = diamondLoupeFacet.facetAddresses();
 
-        // DiamondCutFacet + 4개 facet = 5개
+        // DiamondCutFacet + 4 facets = 5 total
         assertEq(addresses.length, 5);
 
-        // 배포된 각 facet 주소가 포함되어 있는지 확인
+        // Verify each deployed facet address is included
         for (uint256 i = 0; i < facetAddresses.length; i++) {
             bool found = false;
             for (uint256 j = 0; j < addresses.length; j++) {
@@ -217,19 +217,19 @@ contract DiamondLoupeTest is Test {
         }
     }
 
-    // facetAddress() 테스트
+    // Test facetAddress()
     function testFacetAddress() public view {
-        // 배열 변수 선언 후 각 요소 설정
+        // Declare array variable and set each element
         string[] memory loupeFunctionSignatures = new string[](4);
         loupeFunctionSignatures[0] = "facets()";
         loupeFunctionSignatures[1] = "facetFunctionSelectors(address)";
         loupeFunctionSignatures[2] = "facetAddresses()";
         loupeFunctionSignatures[3] = "facetAddress(bytes4)";
 
-        // 셀렉터 얻기
+        // Get selectors
         bytes4[] memory loupeSelectors = getSelectors(loupeFunctionSignatures);
 
-        // 테스트 로직
+        // Test logic
         for (uint256 i = 0; i < loupeSelectors.length; i++) {
             address expectedFacetAddress = selectorToFacetMap[loupeSelectors[i]];
             address actualFacetAddress = diamondLoupeFacet.facetAddress(loupeSelectors[i]);
@@ -237,16 +237,16 @@ contract DiamondLoupeTest is Test {
         }
     }
 
-    // 존재하지 않는 함수 셀렉터에 대한 테스트
+    // Test for non-existent function selector
     function testFacetAddressForNonExistentSelector() public view {
         bytes4 nonExistentSelector = bytes4(keccak256("nonExistentFunction()"));
         address facetAddress = diamondLoupeFacet.facetAddress(nonExistentSelector);
 
-        // 주소(0)을 반환해야 함
+        // Should return address(0)
         assertEq(facetAddress, address(0));
     }
 
-    // supportsInterface() 테스트
+    // Test supportsInterface()
     function testSupportsERC165Interface() public view {
         bool isSupported = IERC165(address(diamond)).supportsInterface(ERC165_INTERFACE_ID);
         assertTrue(isSupported);

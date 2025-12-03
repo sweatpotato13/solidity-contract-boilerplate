@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
-// Diamond 관련 컨트랙트들 임포트
+// Import Diamond-related contracts
 import {Diamond} from "../src/Diamond.sol";
 import {DiamondCutFacet} from "../src/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "../src/facets/DiamondLoupeFacet.sol";
@@ -14,7 +14,7 @@ import {DiamondInit} from "../src/upgradeInitializers/DiamondInit.sol";
 import {IDiamondCut} from "../src/interfaces/IDiamondCut.sol";
 
 contract GasTest is Test {
-    // 컨트랙트 변수들
+    // Contract variables
     Diamond diamond;
     DiamondCutFacet diamondCutFacet;
     DiamondLoupeFacet diamondLoupeFacet;
@@ -23,11 +23,11 @@ contract GasTest is Test {
     ERC20Facet erc20Facet;
     DiamondInit diamondInit;
 
-    // 주소들
+    // Addresses
     address owner;
     address user1;
 
-    // Facet 셀렉터 관리 함수들
+    // Facet selector management functions
     function getSelector(string memory _func) internal pure returns (bytes4) {
         return bytes4(keccak256(bytes(_func)));
     }
@@ -40,27 +40,27 @@ contract GasTest is Test {
         return selectors;
     }
 
-    // 테스트 셋업 (배포)
+    // Test setup (deployment)
     function setUp() public {
         owner = address(this);
         user1 = address(0x123);
 
-        // DiamondCutFacet 배포
+        // Deploy DiamondCutFacet
         diamondCutFacet = new DiamondCutFacet();
 
-        // Diamond 배포
+        // Deploy Diamond
         diamond = new Diamond(owner, address(diamondCutFacet));
 
-        // DiamondInit 배포
+        // Deploy DiamondInit
         diamondInit = new DiamondInit();
 
-        // 각 Facet 배포
+        // Deploy each Facet
         diamondLoupeFacet = new DiamondLoupeFacet();
         ownershipFacet = new OwnershipFacet();
         counterFacet = new CounterFacet();
         erc20Facet = new ERC20Facet();
 
-        // 각 facet의 함수 시그니처 준비
+        // Prepare function signatures for each facet
         string[] memory diamondLoupeFunctions = new string[](5);
         diamondLoupeFunctions[0] = "facets()";
         diamondLoupeFunctions[1] = "facetFunctionSelectors(address)";
@@ -92,7 +92,7 @@ contract GasTest is Test {
         erc20Functions[10] = "mint(address,uint256)";
         erc20Functions[11] = "burn(address,uint256)";
 
-        // Facet 추가를 위한 다이아몬드 컷 준비
+        // Prepare diamond cut for adding facets
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](4);
 
         cut[0] = IDiamondCut.FacetCut({
@@ -119,32 +119,32 @@ contract GasTest is Test {
             functionSelectors: getSelectors(erc20Functions)
         });
 
-        // 초기화 함수 데이터 준비
+        // Prepare initialization function data
         bytes memory functionCall = abi.encodeWithSignature("init()");
 
-        // 다이아몬드 컷 실행
+        // Execute diamond cut
         IDiamondCut(address(diamond)).diamondCut(cut, address(diamondInit), functionCall);
 
-        // 프록시를 통해 컨트랙트 인터페이스 생성
+        // Create contract interfaces through proxy
         diamondLoupeFacet = DiamondLoupeFacet(address(diamond));
         ownershipFacet = OwnershipFacet(address(diamond));
         counterFacet = CounterFacet(address(diamond));
         erc20Facet = ERC20Facet(address(diamond));
     }
 
-    // 카운터 작업의 가스 비용 측정
+    // Measure gas cost of counter operations
     function testCounterOperationsGas() public {
-        // getCount - 읽기 작업
+        // getCount - read operation
         uint256 startGas = gasleft();
         counterFacet.getCount();
         uint256 gasUsed = startGas - gasleft();
 
-        // increment - 쓰기 작업
+        // increment - write operation
         startGas = gasleft();
         counterFacet.increment();
         gasUsed = startGas - gasleft();
 
-        // setCount - 매개변수가 있는 쓰기 작업
+        // setCount - write operation with parameter
         startGas = gasleft();
         counterFacet.setCount(42);
         gasUsed = startGas - gasleft();
@@ -153,26 +153,26 @@ contract GasTest is Test {
         assertEq(counterFacet.getCount(), 42);
     }
 
-    // ERC20 작업의 가스 비용 측정
+    // Measure gas cost of ERC20 operations
     function testERC20OperationsGas() public {
-        // name - 읽기 작업
+        // name - read operation
         uint256 startGas = gasleft();
         erc20Facet.name();
         uint256 gasUsed = startGas - gasleft();
 
-        // mint 토큰 - 쓰기 작업
+        // mint tokens - write operation
         uint256 mintAmount = 1000 * 10 ** 18;
         startGas = gasleft();
         erc20Facet.mint(owner, mintAmount);
         gasUsed = startGas - gasleft();
 
-        // transfer 토큰 - 쓰기 작업
+        // transfer tokens - write operation
         uint256 transferAmount = 100 * 10 ** 18;
         startGas = gasleft();
         erc20Facet.transfer(user1, transferAmount);
         gasUsed = startGas - gasleft();
 
-        // approve 토큰 - 쓰기 작업
+        // approve tokens - write operation
         startGas = gasleft();
         erc20Facet.approve(user1, transferAmount);
         gasUsed = startGas - gasleft();
@@ -182,12 +182,12 @@ contract GasTest is Test {
         assertEq(erc20Facet.allowance(owner, user1), transferAmount);
     }
 
-    // Diamond 업그레이드 작업의 가스 비용 측정
+    // Measure gas cost of Diamond upgrade operations
     function testDiamondUpgradeGas() public {
-        // 교체를 위한 새 CounterFacet 배포
+        // Deploy new CounterFacet for replacement
         CounterFacet newCounterFacet = new CounterFacet();
 
-        // 셀렉터 준비
+        // Prepare selectors
         string[] memory counterFunctions = new string[](4);
         counterFunctions[0] = "getCount()";
         counterFunctions[1] = "increment()";
@@ -195,10 +195,10 @@ contract GasTest is Test {
         counterFunctions[3] = "setCount(uint256)";
         bytes4[] memory selectors = getSelectors(counterFunctions);
 
-        // facet 교체 가스 측정
+        // Measure gas for facet replacement
         uint256 startGas = gasleft();
 
-        // 배열 리터럴 대신 메모리 배열 사용
+        // Use memory array instead of array literal
         IDiamondCut.FacetCut[] memory replaceCuts = new IDiamondCut.FacetCut[](1);
         replaceCuts[0] = IDiamondCut.FacetCut({
             facetAddress: address(newCounterFacet),
@@ -209,10 +209,10 @@ contract GasTest is Test {
         IDiamondCut(address(diamond)).diamondCut(replaceCuts, address(0), "");
         uint256 gasUsed = startGas - gasleft();
 
-        // facet 제거 가스 측정
+        // Measure gas for facet removal
         startGas = gasleft();
 
-        // 배열 리터럴 대신 메모리 배열 사용
+        // Use memory array instead of array literal
         IDiamondCut.FacetCut[] memory removeCuts = new IDiamondCut.FacetCut[](1);
         removeCuts[0] = IDiamondCut.FacetCut({
             facetAddress: address(0), action: IDiamondCut.FacetCutAction.Remove, functionSelectors: selectors
@@ -221,12 +221,12 @@ contract GasTest is Test {
         IDiamondCut(address(diamond)).diamondCut(removeCuts, address(0), "");
         gasUsed = startGas - gasleft();
 
-        // 복잡한 다중 작업 가스 측정 (추가, 교체, 제거 포함)
+        // Measure gas for complex multi-operation (including add, replace, remove)
         CounterFacet anotherCounterFacet = new CounterFacet();
 
         startGas = gasleft();
 
-        // 배열 리터럴 대신 메모리 배열 사용
+        // Use memory array instead of array literal
         IDiamondCut.FacetCut[] memory addCuts = new IDiamondCut.FacetCut[](1);
         addCuts[0] = IDiamondCut.FacetCut({
             facetAddress: address(anotherCounterFacet),
@@ -237,7 +237,7 @@ contract GasTest is Test {
         IDiamondCut(address(diamond)).diamondCut(addCuts, address(0), "");
         gasUsed = startGas - gasleft();
 
-        // 업그레이드 확인
+        // Verify upgrade
         counterFacet.setCount(100);
         assertEq(counterFacet.getCount(), 100);
     }

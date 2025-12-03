@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
-// Diamond 관련 컨트랙트들 임포트
+// Import Diamond-related contracts
 import {Diamond} from "../src/Diamond.sol";
 import {DiamondCutFacet} from "../src/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "../src/facets/DiamondLoupeFacet.sol";
@@ -15,7 +15,7 @@ import {IDiamondCut} from "../src/interfaces/IDiamondCut.sol";
 import {IDiamondLoupe} from "../src/interfaces/IDiamondLoupe.sol";
 
 contract DiamondTest is Test {
-    // 컨트랙트 변수들
+    // Contract variables
     Diamond diamond;
     DiamondCutFacet diamondCutFacet;
     DiamondLoupeFacet diamondLoupeFacet;
@@ -24,11 +24,11 @@ contract DiamondTest is Test {
     ERC20Facet erc20Facet;
     DiamondInit diamondInit;
 
-    // 주소들
+    // Addresses
     address owner;
     address otherAccount;
 
-    // Facet 셀렉터 관리 함수들
+    // Facet selector management functions
     function getSelector(string memory _func) internal pure returns (bytes4) {
         return bytes4(keccak256(bytes(_func)));
     }
@@ -41,27 +41,27 @@ contract DiamondTest is Test {
         return selectors;
     }
 
-    // 테스트 셋업 (배포)
+    // Test setup (deployment)
     function setUp() public {
         owner = address(this);
         otherAccount = address(0x123);
 
-        // DiamondCutFacet 배포
+        // Deploy DiamondCutFacet
         diamondCutFacet = new DiamondCutFacet();
 
-        // Diamond 배포
+        // Deploy Diamond
         diamond = new Diamond(owner, address(diamondCutFacet));
 
-        // DiamondInit 배포
+        // Deploy DiamondInit
         diamondInit = new DiamondInit();
 
-        // 각 Facet 배포
+        // Deploy each Facet
         diamondLoupeFacet = new DiamondLoupeFacet();
         ownershipFacet = new OwnershipFacet();
         counterFacet = new CounterFacet();
         erc20Facet = new ERC20Facet();
 
-        // 각 facet의 함수 시그니처 준비
+        // Prepare function signatures for each facet
         string[] memory diamondLoupeFunctions = new string[](4);
         diamondLoupeFunctions[0] = "facets()";
         diamondLoupeFunctions[1] = "facetFunctionSelectors(address)";
@@ -93,7 +93,7 @@ contract DiamondTest is Test {
         erc20Functions[11] = "burn(address,uint256)";
         erc20Functions[12] = "_approve(address,address,uint256)";
 
-        // Facet 추가를 위한 다이아몬드 컷 준비
+        // Prepare diamond cut for adding facets
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](4);
 
         cut[0] = IDiamondCut.FacetCut({
@@ -120,25 +120,25 @@ contract DiamondTest is Test {
             functionSelectors: getSelectors(erc20Functions)
         });
 
-        // 초기화 함수 데이터 준비
+        // Prepare initialization function data
         bytes memory functionCall = abi.encodeWithSignature("init()");
 
-        // 다이아몬드 컷 실행
+        // Execute diamond cut
         IDiamondCut(address(diamond)).diamondCut(cut, address(diamondInit), functionCall);
 
-        // 프록시를 통해 컨트랙트 인터페이스 생성
+        // Create contract interfaces through proxy
         diamondLoupeFacet = DiamondLoupeFacet(address(diamond));
         ownershipFacet = OwnershipFacet(address(diamond));
         counterFacet = CounterFacet(address(diamond));
         erc20Facet = ERC20Facet(address(diamond));
     }
 
-    // 배포 테스트
+    // Test deployment
     function testDeployment() public {
-        // 다이아몬드 주소 확인
+        // Verify diamond address
         assertTrue(address(diamond) != address(0));
 
-        // 각 facet 주소 확인
+        // Verify each facet address
         assertTrue(address(diamondCutFacet) != address(0));
         assertTrue(address(diamondLoupeFacet) != address(0));
         assertTrue(address(ownershipFacet) != address(0));
@@ -147,31 +147,31 @@ contract DiamondTest is Test {
     }
 
     function testFacetsRegistration() public {
-        // 등록된 facet 수 확인 (DiamondCutFacet + 4개 facet)
+        // Verify number of registered facets (DiamondCutFacet + 4 facets)
         IDiamondLoupe.Facet[] memory facets = diamondLoupeFacet.facets();
         assertEq(facets.length, 5);
     }
 
-    // OwnershipFacet 테스트
+    // Test OwnershipFacet
     function testOwnership() public {
-        // 오너 확인
+        // Verify owner
         assertEq(ownershipFacet.owner(), owner);
     }
 
     function testTransferOwnership() public {
-        // 오너십 이전
+        // Transfer ownership
         ownershipFacet.transferOwnership(otherAccount);
         assertEq(ownershipFacet.owner(), otherAccount);
     }
 
-    // CounterFacet 테스트
+    // Test CounterFacet
     function testCounterInitialValue() public {
-        // 초기값 0 확인
+        // Verify initial value is 0
         assertEq(counterFacet.getCount(), 0);
     }
 
     function testCounterIncrement() public {
-        // 증가 테스트
+        // Test increment
         counterFacet.increment();
         assertEq(counterFacet.getCount(), 1);
 
@@ -180,7 +180,7 @@ contract DiamondTest is Test {
     }
 
     function testCounterDecrement() public {
-        // 감소 테스트 (언더플로우 방지를 위해 먼저 증가)
+        // Test decrement (increment first to prevent underflow)
         counterFacet.increment();
         counterFacet.increment();
         assertEq(counterFacet.getCount(), 2);
@@ -190,21 +190,21 @@ contract DiamondTest is Test {
     }
 
     function testCounterSetValue() public {
-        // 특정 값으로 설정
+        // Set to specific value
         counterFacet.setCount(100);
         assertEq(counterFacet.getCount(), 100);
     }
 
-    // ERC20Facet 테스트
+    // Test ERC20Facet
     function testTokenDetails() public {
-        // 토큰 정보 확인
+        // Verify token details
         assertEq(erc20Facet.name(), "Diamond Token");
         assertEq(erc20Facet.symbol(), "DMD");
         assertEq(erc20Facet.decimals(), 18);
     }
 
     function testMintTokens() public {
-        // 토큰 민팅
+        // Mint tokens
         uint256 mintAmount = 1000 * 10 ** 18;
         erc20Facet.mint(owner, mintAmount);
 
@@ -213,7 +213,7 @@ contract DiamondTest is Test {
     }
 
     function testTokenTransfer() public {
-        // 토큰 전송 테스트
+        // Test token transfer
         uint256 mintAmount = 1000 * 10 ** 18;
         uint256 transferAmount = 100 * 10 ** 18;
 
@@ -225,7 +225,7 @@ contract DiamondTest is Test {
     }
 
     function testTokenApproval() public {
-        // 토큰 승인 및 transferFrom 테스트
+        // Test token approval and transferFrom
         uint256 mintAmount = 1000 * 10 ** 18;
         uint256 approvalAmount = 500 * 10 ** 18;
         uint256 transferAmount = 200 * 10 ** 18;
@@ -235,7 +235,7 @@ contract DiamondTest is Test {
 
         assertEq(erc20Facet.allowance(owner, otherAccount), approvalAmount);
 
-        // 다른 계정이 transferFrom을 호출하는 상황 모사
+        // Simulate another account calling transferFrom
         vm.prank(otherAccount);
         erc20Facet.transferFrom(owner, otherAccount, transferAmount);
 
@@ -245,7 +245,7 @@ contract DiamondTest is Test {
     }
 
     function testUpdateTokenDetails() public {
-        // 토큰 정보 업데이트
+        // Update token details
         erc20Facet.setTokenDetails("Updated Token", "UTK", 8);
 
         assertEq(erc20Facet.name(), "Updated Token");
@@ -253,19 +253,19 @@ contract DiamondTest is Test {
         assertEq(erc20Facet.decimals(), 8);
     }
 
-    // Diamond 업그레이드 테스트
+    // Test Diamond upgrade
     function testAddNewFunctions() public {
-        // 새 CounterFacet 배포
+        // Deploy new CounterFacet
         CounterFacet newCounterFacet = new CounterFacet();
 
-        // 함수 셀렉터 준비
+        // Prepare function selectors
         string[] memory counterFunctions = new string[](4);
         counterFunctions[0] = "getCount()";
         counterFunctions[1] = "increment()";
         counterFunctions[2] = "decrement()";
         counterFunctions[3] = "setCount(uint256)";
 
-        // 교체 실행
+        // Execute replacement
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
         cut[0] = IDiamondCut.FacetCut({
             facetAddress: address(newCounterFacet),
@@ -275,30 +275,30 @@ contract DiamondTest is Test {
 
         IDiamondCut(address(diamond)).diamondCut(cut, address(0), "");
 
-        // 새 기능 테스트
+        // Test new functionality
         counterFacet.setCount(42);
         assertEq(counterFacet.getCount(), 42);
     }
 
     function testRemoveFunctions() public {
-        // 함수 셀렉터 준비
+        // Prepare function selectors
         string[] memory counterFunctions = new string[](4);
         counterFunctions[0] = "getCount()";
         counterFunctions[1] = "increment()";
         counterFunctions[2] = "decrement()";
         counterFunctions[3] = "setCount(uint256)";
 
-        // 함수 제거
+        // Remove functions
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
         cut[0] = IDiamondCut.FacetCut({
-            facetAddress: address(0), // 제거는 주소가 0
+            facetAddress: address(0), // Address 0 for removal
             action: IDiamondCut.FacetCutAction.Remove,
             functionSelectors: getSelectors(counterFunctions)
         });
 
         IDiamondCut(address(diamond)).diamondCut(cut, address(0), "");
 
-        // 함수 호출이 실패하는지 확인
+        // Verify function call fails
         vm.expectRevert();
         counterFacet.getCount();
     }
