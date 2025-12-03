@@ -4,14 +4,14 @@ pragma solidity 0.8.26;
 import {Test} from "forge-std/Test.sol";
 
 // Diamond 관련 컨트랙트들 임포트
-import {Diamond} from "../contracts/Diamond.sol";
-import {DiamondCutFacet} from "../contracts/facets/DiamondCutFacet.sol";
-import {DiamondLoupeFacet} from "../contracts/facets/DiamondLoupeFacet.sol";
-import {OwnershipFacet} from "../contracts/facets/OwnershipFacet.sol";
-import {CounterFacet} from "../contracts/facets/CounterFacet.sol";
-import {ERC20Facet} from "../contracts/facets/ERC20Facet.sol";
-import {DiamondInit} from "../contracts/upgradeInitializers/DiamondInit.sol";
-import {IDiamondCut} from "../contracts/interfaces/IDiamondCut.sol";
+import {Diamond} from "../src/Diamond.sol";
+import {DiamondCutFacet} from "../src/facets/DiamondCutFacet.sol";
+import {DiamondLoupeFacet} from "../src/facets/DiamondLoupeFacet.sol";
+import {OwnershipFacet} from "../src/facets/OwnershipFacet.sol";
+import {CounterFacet} from "../src/facets/CounterFacet.sol";
+import {ERC20Facet} from "../src/facets/ERC20Facet.sol";
+import {DiamondInit} from "../src/upgradeInitializers/DiamondInit.sol";
+import {IDiamondCut} from "../src/interfaces/IDiamondCut.sol";
 
 contract GasTest is Test {
     // 컨트랙트 변수들
@@ -215,9 +215,7 @@ contract GasTest is Test {
         // 배열 리터럴 대신 메모리 배열 사용
         IDiamondCut.FacetCut[] memory removeCuts = new IDiamondCut.FacetCut[](1);
         removeCuts[0] = IDiamondCut.FacetCut({
-            facetAddress: address(0),
-            action: IDiamondCut.FacetCutAction.Remove,
-            functionSelectors: selectors
+            facetAddress: address(0), action: IDiamondCut.FacetCutAction.Remove, functionSelectors: selectors
         });
 
         IDiamondCut(address(diamond)).diamondCut(removeCuts, address(0), "");

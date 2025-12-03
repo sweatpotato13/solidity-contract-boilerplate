@@ -4,16 +4,16 @@ pragma solidity 0.8.26;
 import {Test} from "forge-std/Test.sol";
 
 // Diamond 관련 컨트랙트들 임포트
-import {Diamond} from "../contracts/Diamond.sol";
-import {DiamondCutFacet} from "../contracts/facets/DiamondCutFacet.sol";
-import {DiamondLoupeFacet} from "../contracts/facets/DiamondLoupeFacet.sol";
-import {OwnershipFacet} from "../contracts/facets/OwnershipFacet.sol";
-import {CounterFacet} from "../contracts/facets/CounterFacet.sol";
-import {ERC20Facet} from "../contracts/facets/ERC20Facet.sol";
-import {DiamondInit} from "../contracts/upgradeInitializers/DiamondInit.sol";
-import {IDiamondCut} from "../contracts/interfaces/IDiamondCut.sol";
-import {IDiamondLoupe} from "../contracts/interfaces/IDiamondLoupe.sol";
-import {IERC165} from "../contracts/interfaces/IERC165.sol";
+import {Diamond} from "../src/Diamond.sol";
+import {DiamondCutFacet} from "../src/facets/DiamondCutFacet.sol";
+import {DiamondLoupeFacet} from "../src/facets/DiamondLoupeFacet.sol";
+import {OwnershipFacet} from "../src/facets/OwnershipFacet.sol";
+import {CounterFacet} from "../src/facets/CounterFacet.sol";
+import {ERC20Facet} from "../src/facets/ERC20Facet.sol";
+import {DiamondInit} from "../src/upgradeInitializers/DiamondInit.sol";
+import {IDiamondCut} from "../src/interfaces/IDiamondCut.sol";
+import {IDiamondLoupe} from "../src/interfaces/IDiamondLoupe.sol";
+import {IERC165} from "../src/interfaces/IERC165.sol";
 
 contract DiamondLoupeTest is Test {
     // 컨트랙트 변수들
@@ -149,9 +149,7 @@ contract DiamondLoupeTest is Test {
         });
 
         cut[3] = IDiamondCut.FacetCut({
-            facetAddress: address(erc20Facet),
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: erc20Selectors
+            facetAddress: address(erc20Facet), action: IDiamondCut.FacetCutAction.Add, functionSelectors: erc20Selectors
         });
 
         // 초기화 함수 데이터 준비

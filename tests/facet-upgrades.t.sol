@@ -4,17 +4,17 @@ pragma solidity 0.8.26;
 import {Test} from "forge-std/Test.sol";
 
 // Diamond 관련 컨트랙트들 임포트
-import {Diamond} from "../contracts/Diamond.sol";
-import {DiamondCutFacet} from "../contracts/facets/DiamondCutFacet.sol";
-import {DiamondLoupeFacet} from "../contracts/facets/DiamondLoupeFacet.sol";
-import {OwnershipFacet} from "../contracts/facets/OwnershipFacet.sol";
-import {CounterFacet} from "../contracts/facets/CounterFacet.sol";
-import {CounterFacetV2} from "../contracts/facets/CounterFacetV2.sol";
-import {CounterFacetV3} from "../contracts/facets/CounterFacetV3.sol";
-import {ERC20Facet} from "../contracts/facets/ERC20Facet.sol";
-import {CalculatorFacet} from "../contracts/facets/CalculatorFacet.sol";
-import {DiamondInit} from "../contracts/upgradeInitializers/DiamondInit.sol";
-import {IDiamondCut} from "../contracts/interfaces/IDiamondCut.sol";
+import {Diamond} from "../src/Diamond.sol";
+import {DiamondCutFacet} from "../src/facets/DiamondCutFacet.sol";
+import {DiamondLoupeFacet} from "../src/facets/DiamondLoupeFacet.sol";
+import {OwnershipFacet} from "../src/facets/OwnershipFacet.sol";
+import {CounterFacet} from "../src/facets/CounterFacet.sol";
+import {CounterFacetV2} from "../src/facets/CounterFacetV2.sol";
+import {CounterFacetV3} from "../src/facets/CounterFacetV3.sol";
+import {ERC20Facet} from "../src/facets/ERC20Facet.sol";
+import {CalculatorFacet} from "../src/facets/CalculatorFacet.sol";
+import {DiamondInit} from "../src/upgradeInitializers/DiamondInit.sol";
+import {IDiamondCut} from "../src/interfaces/IDiamondCut.sol";
 
 contract FacetUpgradesTest is Test {
     // 컨트랙트 변수들
@@ -169,9 +169,7 @@ contract FacetUpgradesTest is Test {
         // 기존 셀렉터 제거
         IDiamondCut.FacetCut[] memory removeCut = new IDiamondCut.FacetCut[](1);
         removeCut[0] = IDiamondCut.FacetCut({
-            facetAddress: address(0),
-            action: IDiamondCut.FacetCutAction.Remove,
-            functionSelectors: selectorsToRemove
+            facetAddress: address(0), action: IDiamondCut.FacetCutAction.Remove, functionSelectors: selectorsToRemove
         });
 
         IDiamondCut(address(diamond)).diamondCut(removeCut, address(0), "");
@@ -402,9 +400,7 @@ contract FacetUpgradesTest is Test {
         // CalculatorFacet 제거
         IDiamondCut.FacetCut[] memory removeCut = new IDiamondCut.FacetCut[](1);
         removeCut[0] = IDiamondCut.FacetCut({
-            facetAddress: address(0),
-            action: IDiamondCut.FacetCutAction.Remove,
-            functionSelectors: calculatorSelectors
+            facetAddress: address(0), action: IDiamondCut.FacetCutAction.Remove, functionSelectors: calculatorSelectors
         });
 
         IDiamondCut(address(diamond)).diamondCut(removeCut, address(0), "");
@@ -440,9 +436,7 @@ contract FacetUpgradesTest is Test {
 
         IDiamondCut.FacetCut[] memory replaceCut = new IDiamondCut.FacetCut[](1);
         replaceCut[0] = IDiamondCut.FacetCut({
-            facetAddress: address(counterV2),
-            action: IDiamondCut.FacetCutAction.Replace,
-            functionSelectors: selectors
+            facetAddress: address(counterV2), action: IDiamondCut.FacetCutAction.Replace, functionSelectors: selectors
         });
 
         IDiamondCut(address(diamond)).diamondCut(replaceCut, address(0), "");
@@ -498,9 +492,7 @@ contract FacetUpgradesTest is Test {
 
         // 기존 Counter 제거
         cuts[0] = IDiamondCut.FacetCut({
-            facetAddress: address(0),
-            action: IDiamondCut.FacetCutAction.Remove,
-            functionSelectors: counterSelectors
+            facetAddress: address(0), action: IDiamondCut.FacetCutAction.Remove, functionSelectors: counterSelectors
         });
 
         // CounterV2 추가
