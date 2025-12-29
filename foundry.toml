@@ -6,6 +6,8 @@ test = 'tests'
 cache_path  = 'cache_forge'
 optimizer = true
 optimizer_runs = 200
+solc = '0.8.24'
+evm_version = 'shanghai'
 
 fs_permissions = [
     { access = "read", path = "./" },
@@ -13,7 +15,13 @@ fs_permissions = [
 ]
 
 [rpc_endpoints]
+ethereum = "${ETH_MAINNET_RPC_URL}"
 sepolia = "${ETH_SEPOLIA_RPC_URL}"
+base = "${BASE_RPC_URL}"
+base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
 
 [etherscan]
+ethereum = { key = "${ETH_MAINNET_SCAN_API_KEY}", url = "${ETH_MAINNET_ETHERSCAN_VERIFIER_URL}" }
 sepolia = { key = "${ETH_SEPOLIA_SCAN_API_KEY}", url = "${ETH_SEPOLIA_ETHERSCAN_VERIFIER_URL}" }
+base = { key = "${BASE_SCAN_API_KEY}", url = "${BASE_ETHERSCAN_VERIFIER_URL}" }
+base_sepolia = { key = "${BASE_SEPOLIA_SCAN_API_KEY}", url = "${BASE_SEPOLIA_ETHERSCAN_VERIFIER_URL}" }
