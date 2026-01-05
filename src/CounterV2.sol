@@ -10,6 +10,17 @@ import {Counter} from "./Counter.sol";
  */
 abstract contract CounterV2 is Counter {
     // ============================================
+    // CUSTOM ERRORS
+    // ============================================
+
+    /**
+     * @notice Thrown when decrement amount exceeds current counter value
+     * @param currentValue Current counter value
+     * @param requestedAmount Requested decrement amount
+     */
+    error InsufficientCounterValue(uint256 currentValue, uint256 requestedAmount);
+
+    // ============================================
     // EVENTS
     // ============================================
 
@@ -27,13 +38,16 @@ abstract contract CounterV2 is Counter {
 
     /**
      * @notice Decrement the caller's counter by a specific amount
-     * @dev Counter cannot go below zero
+     * @dev Counter cannot go below zero. Reverts with InsufficientCounterValue if amount > current counter
      * @param amount Amount to decrement by
      */
     function decrementBy(uint256 amount) external {
-        require(counters[msg.sender] >= amount, "CounterV2: insufficient counter value");
+        uint256 currentValue = counters[msg.sender];
+        if (currentValue < amount) {
+            revert InsufficientCounterValue(currentValue, amount);
+        }
 
-        counters[msg.sender] -= amount;
+        counters[msg.sender] = currentValue - amount;
 
         emit CounterDecremented(msg.sender, counters[msg.sender], block.timestamp);
     }
