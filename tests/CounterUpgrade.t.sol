@@ -143,7 +143,7 @@ contract CounterUpgradeTest is Test {
 
         // Try to decrement more than available
         vm.prank(user1);
-        vm.expectRevert("CounterV2: insufficient counter value");
+        vm.expectRevert(abi.encodeWithSelector(CounterV2.InsufficientCounterValue.selector, 3, 5));
         counterV2.decrementBy(5);
     }
 
@@ -235,5 +235,158 @@ contract CounterUpgradeTest is Test {
         // Owner can upgrade
         vm.prank(owner);
         proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(proxy)), address(implementationV2), "");
+    }
+
+    // ============================================
+    // SECURITY TESTS
+    // ============================================
+
+    /**
+     * @notice Test that V2 implementation cannot be initialized directly
+     * @dev Verifies _disableInitializers() is called in CounterInstanceV2 constructor
+     */
+    function test_Security_V2ImplementationCannotBeInitialized() public {
+        implementationV2 = new CounterInstanceV2();
+
+        // Attempt to initialize V2 implementation directly should revert
+        vm.expectRevert();
+        implementationV2.initialize(user1);
+    }
+
+    /**
+     * @notice Test that proxy cannot be reinitialized after upgrade
+     * @dev Ensures initializer state is preserved across upgrades
+     */
+    function test_Security_CannotReinitializeAfterUpgrade() public {
+        // Upgrade to V2
+        implementationV2 = new CounterInstanceV2();
+        vm.prank(owner);
+        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(proxy)), address(implementationV2), "");
+
+        counterV2 = CounterV2(address(proxy));
+
+        // Attempt to reinitialize should revert
+        vm.expectRevert();
+        counterV2.initialize(user1);
+    }
+
+    /**
+     * @notice Test decrement at boundary conditions
+     * @dev Verifies underflow protection in decrementBy
+     */
+    function test_Security_DecrementBoundary() public {
+        // Upgrade to V2
+        implementationV2 = new CounterInstanceV2();
+        vm.prank(owner);
+        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(proxy)), address(implementationV2), "");
+
+        counterV2 = CounterV2(address(proxy));
+
+        // User increments once
+        vm.prank(user1);
+        counterV2.increment();
+
+        // Decrement by exactly the amount should work
+        vm.prank(user1);
+        counterV2.decrementBy(1);
+        assertEq(counterV2.counters(user1), 0, "Counter should be 0 after exact decrement");
+
+        // Decrement by 0 should work (no-op)
+        vm.prank(user1);
+        counterV2.decrementBy(0);
+        assertEq(counterV2.counters(user1), 0, "Counter should remain 0 after decrement by 0");
+
+        // Decrement by 1 when counter is 0 should revert
+        vm.prank(user1);
+        vm.expectRevert(abi.encodeWithSelector(CounterV2.InsufficientCounterValue.selector, 0, 1));
+        counterV2.decrementBy(1);
+    }
+
+    /**
+     * @notice Test decrement with max uint256 amount
+     * @dev Verifies extreme value handling
+     */
+    function test_Security_DecrementMaxValue() public {
+        // Upgrade to V2
+        implementationV2 = new CounterInstanceV2();
+        vm.prank(owner);
+        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(proxy)), address(implementationV2), "");
+
+        counterV2 = CounterV2(address(proxy));
+
+        // User increments once
+        vm.prank(user1);
+        counterV2.increment();
+
+        // Attempt to decrement by max uint256 should revert
+        vm.prank(user1);
+        vm.expectRevert(abi.encodeWithSelector(CounterV2.InsufficientCounterValue.selector, 1, type(uint256).max));
+        counterV2.decrementBy(type(uint256).max);
+    }
+
+    /**
+     * @notice Test that ownership is preserved through multiple upgrades
+     * @dev Ensures access control state is not corrupted by upgrades
+     */
+    function test_Security_OwnershipPreservedThroughUpgrades() public {
+        assertEq(counterV1.owner(), owner, "Owner should be set in V1");
+
+        // Upgrade to V2
+        implementationV2 = new CounterInstanceV2();
+        vm.prank(owner);
+        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(proxy)), address(implementationV2), "");
+
+        counterV2 = CounterV2(address(proxy));
+        assertEq(counterV2.owner(), owner, "Owner should be preserved after upgrade to V2");
+
+        // Downgrade back to V1
+        CounterInstance newV1 = new CounterInstance();
+        vm.prank(owner);
+        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(proxy)), address(newV1), "");
+
+        Counter downgradedCounter = Counter(address(proxy));
+        assertEq(downgradedCounter.owner(), owner, "Owner should be preserved after downgrade");
+    }
+
+    /**
+     * @notice Test storage layout is not corrupted after upgrade
+     * @dev Verifies all storage variables maintain their values
+     */
+    function test_Security_StorageLayoutPreservation() public {
+        // Create complex state in V1
+        vm.startPrank(user1);
+        for (uint256 i = 0; i < 5; i++) {
+            counterV1.increment();
+        }
+        vm.stopPrank();
+
+        vm.startPrank(user2);
+        for (uint256 i = 0; i < 3; i++) {
+            counterV1.increment();
+        }
+        vm.stopPrank();
+
+        // Record all state
+        uint256 user1CountBefore = counterV1.counters(user1);
+        uint256 user2CountBefore = counterV1.counters(user2);
+        uint256 user1IncrementsBefore = counterV1.userIncrementCount(user1);
+        uint256 user2IncrementsBefore = counterV1.userIncrementCount(user2);
+        uint256 totalIncrementsBefore = counterV1.totalIncrements();
+        uint256 uniqueUsersBefore = counterV1.uniqueUsers();
+
+        // Upgrade to V2
+        implementationV2 = new CounterInstanceV2();
+        vm.prank(owner);
+        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(address(proxy)), address(implementationV2), "");
+
+        counterV2 = CounterV2(address(proxy));
+
+        // Verify all state is preserved
+        assertEq(counterV2.counters(user1), user1CountBefore, "User1 counter corrupted");
+        assertEq(counterV2.counters(user2), user2CountBefore, "User2 counter corrupted");
+        assertEq(counterV2.userIncrementCount(user1), user1IncrementsBefore, "User1 increment count corrupted");
+        assertEq(counterV2.userIncrementCount(user2), user2IncrementsBefore, "User2 increment count corrupted");
+        assertEq(counterV2.totalIncrements(), totalIncrementsBefore, "Total increments corrupted");
+        assertEq(counterV2.uniqueUsers(), uniqueUsersBefore, "Unique users corrupted");
     }
 }
