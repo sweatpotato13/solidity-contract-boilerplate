@@ -42,11 +42,15 @@ contract CounterLens is ICounterLens {
 
     /// @inheritdoc ICounterLens
     function getCountBatch(address counter, address[] calldata users) external view returns (uint256[] memory counts) {
-        counts = new uint256[](users.length);
+        uint256 length = users.length;
+        counts = new uint256[](length);
         CounterInstance counterInstance = CounterInstance(counter);
 
-        for (uint256 i = 0; i < users.length; i++) {
+        for (uint256 i = 0; i < length;) {
             counts[i] = counterInstance.counters(users[i]);
+            unchecked {
+                ++i;
+            }
         }
     }
 }
