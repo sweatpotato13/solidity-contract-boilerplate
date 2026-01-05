@@ -1,0 +1,180 @@
+---
+alwaysApply: true
+---
+# Solidity Contract Constitution
+
+## Core Principles
+
+### I. Test-Driven Development (TDD) - NON-NEGOTIABLE
+
+All smart contract development MUST follow strict TDD methodology:
+
+1. **Write Tests First**: Tests MUST be written before implementation code
+2. **Red-Green-Refactor**: 
+   - Red: Write failing tests that define expected behavior
+   - Green: Write minimal code to make tests pass
+   - Refactor: Improve code quality while maintaining passing tests
+3. **Test Coverage Requirements**:
+   - Every public/external function MUST have at least one test
+   - Edge cases and boundary conditions MUST be tested
+   - Upgrade scenarios MUST be tested for upgradeable contracts
+   - Failure modes and reverts MUST be explicitly tested
+4. **No Implementation Without Failing Tests**: Code changes without corresponding tests are REJECTED
+
+**Rationale**: Smart contracts are immutable once deployed. TDD ensures correctness before deployment, catching bugs when they're cheapest to fix.
+
+### II. NatSpec Documentation - MANDATORY
+
+All contracts, interfaces, and significant functions MUST include complete NatSpec documentation:
+
+1. **Contract Level**: `@title`, `@author`, `@notice`, `@dev` for implementation details
+2. **Function Level**: 
+   - `@notice` for user-facing description
+   - `@dev` for developer notes
+   - `@param` for every parameter
+   - `@return` for every return value
+   - `@inheritdoc` when overriding interface functions
+3. **Event Level**: `@notice` describing when event is emitted
+4. **Error Level**: `@notice` describing failure conditions
+5. **State Variables**: Document purpose and constraints for non-trivial variables
+
+**Rationale**: NatSpec generates automated documentation and improves code auditability. Clear documentation reduces integration errors and accelerates onboarding.
+
+### III. Security-First Design
+
+Security MUST be the primary consideration in all design decisions:
+
+1. **Use Battle-Tested Libraries**: Prefer OpenZeppelin contracts over custom implementations
+2. **Check-Effects-Interactions Pattern**: MUST be followed for all state-changing functions
+3. **Reentrancy Protection**: Apply `nonReentrant` modifier to functions that transfer value or call external contracts
+4. **Access Control**: 
+   - All privileged functions MUST have explicit access modifiers
+   - Role-based access MUST use OpenZeppelin AccessControl or Ownable
+5. **Input Validation**: All external/public function inputs MUST be validated
+6. **Integer Safety**: Use Solidity 0.8+ built-in overflow protection; document intentional unchecked blocks
+7. **Initializer Protection**: Upgradeable contracts MUST call `_disableInitializers()` in constructor
+
+**Rationale**: Smart contract vulnerabilities result in irreversible fund loss. Security patterns MUST be enforced at the code level.
+
+### IV. Code Quality Standards
+
+Maintain clean, readable, and maintainable code:
+
+1. **Function Length**: Functions exceeding 50 lines MUST be refactored
+2. **Nesting Depth**: Maximum 3 levels of nesting; flatten with early returns
+3. **Single Responsibility**: Each contract/function SHOULD have one clear purpose
+4. **Naming Conventions**:
+   - Contracts: PascalCase
+   - Functions/variables: camelCase
+   - Constants: UPPER_SNAKE_CASE
+   - Private/internal: prefix with underscore (_privateVar)
+5. **Error Handling**: Use custom errors over `require` strings for gas efficiency
+6. **Events**: Emit events for all state changes affecting external observers
+7. **Code Review**: All PRs MUST pass CodeRabbit review with no critical/security findings
+
+**Rationale**: Code quality directly impacts auditability, maintainability, and security. Consistent standards reduce cognitive load during reviews.
+
+### V. Gas Optimization & Performance
+
+Optimize gas consumption without sacrificing security or readability:
+
+1. **Storage Layout**:
+   - Pack related storage variables to minimize slot usage
+   - Use `CounterStorage` pattern for upgradeable contracts
+   - Maintain storage gaps (`uint256[50] private __gap`) for future upgrades
+2. **Read Operations**: 
+   - Separate read-only operations into Lens contracts
+   - Use `view`/`pure` appropriately
+   - Prefer `calldata` over `memory` for external function parameters
+3. **Loop Optimization**:
+   - Cache array length outside loops
+   - Avoid unbounded loops in state-changing functions
+4. **Batch Operations**: Provide batch functions for common multi-call scenarios
+5. **Gas Benchmarking**: Run `forge test --gas-report` before merging changes
+
+**Rationale**: Gas costs directly impact user experience and contract viability. Optimization MUST be measurable and intentional.
+
+### VI. Upgrade Safety
+
+Upgradeable contracts MUST follow strict upgrade discipline:
+
+1. **Storage Layout Preservation**:
+   - NEVER remove or reorder existing storage variables
+   - Only append new variables after existing ones
+   - Document storage layout in dedicated `*Storage.sol` contracts
+2. **Initialization**:
+   - Use `initializer` modifier for proxy initialization
+   - Disable constructors with `_disableInitializers()`
+   - Validate initialization cannot be called twice
+3. **Upgrade Testing**:
+   - Every upgrade MUST include state preservation tests
+   - Test migration of existing data to new contract version
+   - Verify new functionality doesn't break existing interfaces
+4. **Version Tracking**: Implement `version()` function returning semantic version string
+
+**Rationale**: Incorrect upgrades can corrupt state or brick contracts permanently. Disciplined upgrade patterns prevent catastrophic failures.
+
+## Security Requirements
+
+1. **Pre-Deployment Checklist**:
+   - [ ] All tests passing with 100% of critical paths covered
+   - [ ] CodeRabbit review completed with no critical/security findings
+   - [ ] NatSpec documentation complete for all public interfaces
+   - [ ] Gas report reviewed and optimizations applied
+   - [ ] Upgrade tests passing (for upgradeable contracts)
+
+2. **Prohibited Patterns**:
+   - `selfdestruct` usage without explicit justification
+   - `delegatecall` to untrusted contracts
+   - Unprotected initialization functions
+   - Floating pragma versions in production code
+
+3. **Required Patterns**:
+   - Explicit Solidity version: `pragma solidity ^0.8.20;` or higher
+   - SPDX license identifier in every file
+   - Interface-first design for external interactions
+
+## Development Workflow
+
+1. **Feature Development Flow**:
+   - Write specification with acceptance criteria
+   - Create failing tests based on specification (TDD Red)
+   - Implement minimal code to pass tests (TDD Green)
+   - Refactor while maintaining passing tests (TDD Refactor)
+   - Add NatSpec documentation
+   - Run `forge test --gas-report` to verify performance
+   - Run CodeRabbit review: `coderabbit --prompt-only -t uncommitted`
+
+2. **Code Review Gates**:
+   - All tests MUST pass: `forge test`
+   - No compiler warnings allowed
+   - NatSpec coverage verified
+   - CodeRabbit critical/security findings addressed
+   - Gas report changes documented for significant deviations
+
+3. **Commit Standards**:
+   - Use conventional commit messages
+   - Reference issue/spec numbers where applicable
+   - Separate test commits from implementation when possible
+
+## Governance
+
+This Constitution supersedes all other development practices. All contributions MUST verify compliance with these principles.
+
+**Amendment Process**:
+1. Propose changes via documented RFC
+2. Demonstrate need with concrete examples
+3. Update all affected templates and documentation
+4. Increment constitution version appropriately
+
+**Version Policy**:
+- MAJOR: Breaking changes to principles (removals, fundamental redefinitions)
+- MINOR: New principles added or significant expansions
+- PATCH: Clarifications, typo fixes, non-semantic refinements
+
+**Compliance Review**:
+- All PRs MUST reference applicable Constitution principles
+- Violations require documented justification with complexity tracking
+- Regular audits of codebase against current Constitution
+
+**Version**: 1.0.0 | **Ratified**: 2026-01-05 | **Last Amended**: 2026-01-05
