@@ -182,4 +182,102 @@ contract CounterTest is Test {
         assertEq(counter.counters(user1), 0, "New user counter should be 0");
         assertEq(counter.userIncrementCount(user1), 0, "New user increment count should be 0");
     }
+
+    // ============================================
+    // SECURITY TESTS
+    // ============================================
+
+    /**
+     * @notice Test that proxy cannot be reinitialized
+     * @dev Verifies initializer modifier prevents double initialization
+     */
+    function test_Security_CannotReinitialize() public {
+        // Attempt to reinitialize should revert
+        vm.expectRevert();
+        counter.initialize(user1);
+    }
+
+    /**
+     * @notice Test that implementation contract cannot be initialized directly
+     * @dev Verifies _disableInitializers() is called in constructor
+     */
+    function test_Security_ImplementationCannotBeInitialized() public {
+        // Attempt to initialize implementation directly should revert
+        vm.expectRevert();
+        implementation.initialize(user1);
+    }
+
+    /**
+     * @notice Test increment behavior at extreme counter values
+     * @dev Verifies no overflow issues near uint256 max (though practically unreachable)
+     */
+    function test_Security_IncrementDoesNotOverflow() public {
+        // Set counter to near max value using vm.store
+        // Slot calculation: counters mapping is at slot 0 in CounterStorage
+        bytes32 slot = keccak256(abi.encode(user1, uint256(0)));
+        vm.store(address(proxy), slot, bytes32(type(uint256).max - 1));
+
+        assertEq(counter.counters(user1), type(uint256).max - 1, "Counter should be max - 1");
+
+        // Increment should work
+        vm.prank(user1);
+        counter.increment();
+
+        assertEq(counter.counters(user1), type(uint256).max, "Counter should be max");
+
+        // Next increment should revert due to overflow protection
+        vm.prank(user1);
+        vm.expectRevert();
+        counter.increment();
+    }
+
+    /**
+     * @notice Test that zero address can still increment (no special restrictions)
+     * @dev This documents current behavior - may want to restrict in production
+     */
+    function test_Security_ZeroAddressCanIncrement() public {
+        // Note: In production, you may want to add require(msg.sender != address(0))
+        // but address(0) cannot actually send transactions, so this is mainly for documentation
+        vm.prank(address(0));
+        // This would revert in real blockchain but we test it for documentation
+        counter.increment();
+        assertEq(counter.counters(address(0)), 1, "Zero address counter should be 1");
+    }
+
+    /**
+     * @notice Test ownership is correctly set and cannot be changed by non-owner
+     * @dev Verifies access control on ownership functions
+     */
+    function test_Security_OnlyOwnerCanTransferOwnership() public {
+        // Non-owner cannot transfer ownership
+        vm.prank(user1);
+        vm.expectRevert();
+        counter.transferOwnership(user1);
+
+        // Owner can transfer ownership
+        vm.prank(owner);
+        counter.transferOwnership(user1);
+        assertEq(counter.owner(), user1, "Owner should be transferred to user1");
+    }
+
+    /**
+     * @notice Test that counters are independent between users
+     * @dev Ensures one user cannot affect another user's counter
+     */
+    function test_Security_CountersAreIndependent() public {
+        // User1 increments
+        vm.prank(user1);
+        counter.increment();
+
+        // User2's counter should remain 0
+        assertEq(counter.counters(user2), 0, "User2 counter should be unaffected");
+
+        // User2 increments
+        vm.prank(user2);
+        counter.increment();
+
+        // Both counters should be independent
+        assertEq(counter.counters(user1), 1, "User1 counter should be 1");
+        assertEq(counter.counters(user2), 1, "User2 counter should be 1");
+    }
 }
